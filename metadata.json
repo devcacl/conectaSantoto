@@ -1,0 +1,6 @@
+{
+  "name": "Santoto Admisiones",
+  "description": "App oficial de Admisiones y Marketing de la Universidad Santo Tomás Seccional Tunja con Chatbot RAG, Explora 360 VR, test vocacional, agendamiento de visitas y panel de gestión de leads.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
