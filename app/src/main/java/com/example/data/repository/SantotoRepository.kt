@@ -2,7 +2,9 @@ package com.example.data.repository
 
 import com.example.data.local.SantotoDao
 import com.example.data.model.CampusEvent
+import com.example.data.model.CampusNews
 import com.example.data.model.CampusVisit
+import com.example.data.model.EventRegistration
 import com.example.data.model.Lead
 import com.example.data.model.LeadStatus
 import com.example.data.model.RagDocument
@@ -15,11 +17,14 @@ class SantotoRepository(private val dao: SantotoDao) {
     val allLeads: Flow<List<Lead>> = dao.getAllLeads()
     val allVisits: Flow<List<CampusVisit>> = dao.getAllVisits()
     val allEvents: Flow<List<CampusEvent>> = dao.getAllEvents()
+    val allNews: Flow<List<CampusNews>> = dao.getAllNews()
+    val allRegistrations: Flow<List<EventRegistration>> = dao.getAllRegistrations()
     val allRagDocuments: Flow<List<RagDocument>> = dao.getAllRagDocuments()
 
     val leadCount: Flow<Int> = dao.getLeadCount()
     val visitCount: Flow<Int> = dao.getVisitCount()
     val eventCount: Flow<Int> = dao.getEventCount()
+    val newsCount: Flow<Int> = dao.getNewsCount()
     val ragDocumentCount: Flow<Int> = dao.getRagDocumentCount()
 
     suspend fun insertLead(lead: Lead): Long = dao.insertLead(lead)
@@ -28,12 +33,66 @@ class SantotoRepository(private val dao: SantotoDao) {
     suspend fun deleteLead(lead: Lead) = dao.deleteLead(lead)
 
     suspend fun insertVisit(visit: CampusVisit): Long = dao.insertVisit(visit)
+    suspend fun updateVisit(visit: CampusVisit) = dao.updateVisit(visit)
     suspend fun updateVisitStatus(id: Long, status: VisitStatus) = dao.updateVisitStatus(id, status)
     suspend fun deleteVisit(visit: CampusVisit) = dao.deleteVisit(visit)
 
     suspend fun insertEvent(event: CampusEvent): Long = dao.insertEvent(event)
     suspend fun updateEvent(event: CampusEvent) = dao.updateEvent(event)
     suspend fun deleteEvent(event: CampusEvent) = dao.deleteEvent(event)
+
+    // News CRUD
+    suspend fun insertNews(news: CampusNews): Long = dao.insertNews(news)
+    suspend fun updateNews(news: CampusNews) = dao.updateNews(news)
+    suspend fun deleteNews(news: CampusNews) = dao.deleteNews(news)
+
+    // Event Registrations & Attendance
+    fun getRegistrationsForEvent(eventId: Long): Flow<List<EventRegistration>> = dao.getRegistrationsForEvent(eventId)
+    suspend fun insertRegistration(registration: EventRegistration): Long = dao.insertRegistration(registration)
+    suspend fun updateRegistration(registration: EventRegistration) = dao.updateRegistration(registration)
+    suspend fun deleteRegistration(registration: EventRegistration) = dao.deleteRegistration(registration)
+    suspend fun updateAttendance(registrationId: Long, attended: Boolean) = dao.updateAttendance(registrationId, attended)
+
+    suspend fun registerForEvent(
+        event: CampusEvent,
+        fullName: String,
+        phone: String,
+        email: String,
+        school: String
+    ): EventRegistration {
+        val randomSuffix = (1000..9999).random()
+        val ticketCode = "USTA-EVT-$randomSuffix"
+
+        val reg = EventRegistration(
+            eventId = event.id,
+            eventTitle = event.title,
+            fullName = fullName.trim(),
+            phone = phone.trim(),
+            email = email.trim(),
+            schoolOrOrigin = school.trim(),
+            attended = false,
+            ticketCode = ticketCode
+        )
+        val id = dao.insertRegistration(reg)
+
+        // Decrement available spots in real time
+        val newSpots = (event.availableSpots - 1).coerceAtLeast(0)
+        dao.updateEvent(event.copy(availableSpots = newSpots))
+
+        // Also ensure lead exists in pipeline
+        val lead = Lead(
+            fullName = fullName.trim(),
+            phone = phone.trim(),
+            email = email.trim(),
+            cityOrSchool = school.ifBlank { "Aspirante a Evento" },
+            programInterest = event.category,
+            status = LeadStatus.CONTACTADO,
+            notes = "Inscrito al evento: ${event.title} (${event.dateBadge} - $ticketCode)"
+        )
+        dao.insertLead(lead)
+
+        return reg.copy(id = id)
+    }
 
     suspend fun getAllRagDocumentsList(): List<RagDocument> = dao.getAllRagDocumentsList()
     suspend fun insertRagDocument(doc: RagDocument): Long = dao.insertRagDocument(doc)
@@ -120,6 +179,9 @@ class SantotoRepository(private val dao: SantotoDao) {
                     location = "Campus Av. Universitaria - Edificio Santo Domingo",
                     category = "Feria Universitaria",
                     description = "Vive la experiencia tomasina por un día: clases muestra, retos en laboratorios de IA y robótica, simulación de juicios en Derecho y talleres en vivo con directores.",
+                    imageUrl = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
+                    capacity = 80,
+                    availableSpots = 62,
                     isFeatured = true
                 ),
                 CampusEvent(
@@ -130,6 +192,9 @@ class SantotoRepository(private val dao: SantotoDao) {
                     location = "Campus Centro Histórico y Av. Universitaria",
                     category = "Colegios Grado 11",
                     description = "Aprende cómo adelantar créditos de tu carrera universitaria por solo $100.000 mientras cursas 11° y recibe certificación institucional homologable.",
+                    imageUrl = "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80",
+                    capacity = 50,
+                    availableSpots = 28,
                     isFeatured = true
                 ),
                 CampusEvent(
@@ -140,10 +205,131 @@ class SantotoRepository(private val dao: SantotoDao) {
                     location = "Plaza Central Santo Domingo",
                     category = "Admisiones y Financiación",
                     description = "Asesoría personalizada sobre descuentos por pronto pago hasta el 31 de octubre, convenios con el SENA, crédito directo sin codeudor y becas por promedio.",
+                    imageUrl = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop&q=80",
+                    capacity = 120,
+                    availableSpots = 95,
+                    isFeatured = true
+                ),
+                CampusEvent(
+                    title = "Simposio de Inteligencia Artificial & Big Data Tunja",
+                    dateBadge = "06 NOV",
+                    dateText = "2026-11-06",
+                    time = "03:00 PM - 06:00 PM",
+                    location = "Auditorio Mayor Campus Av. Universitaria",
+                    category = "Innovación & IA",
+                    description = "Conferencias internacionales sobre aplicaciones de Inteligencia Artificial, agentes autónomos y análisis masivo de datos en Boyacá y el país.",
+                    imageUrl = "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80",
+                    capacity = 90,
+                    availableSpots = 44,
                     isFeatured = true
                 )
             )
             dao.insertEvents(initialEvents)
+
+            // Seed initial registrations for demoing check-in and attendance management
+            val eventList = dao.getAllEvents().first()
+            val openDayId = eventList.firstOrNull()?.id ?: 1L
+            val initialRegistrations = listOf(
+                EventRegistration(
+                    eventId = openDayId,
+                    eventTitle = "Open Day Santoto Tunja 2026 - 2027",
+                    fullName = "Valentina Rojas Díaz",
+                    phone = "3124567890",
+                    email = "valentina.rojas@gmail.com",
+                    schoolOrOrigin = "Colegio Boyacá de Tunja",
+                    attended = false,
+                    ticketCode = "USTA-EVT-7182"
+                ),
+                EventRegistration(
+                    eventId = openDayId,
+                    eventTitle = "Open Day Santoto Tunja 2026 - 2027",
+                    fullName = "Juan David Salamanca",
+                    phone = "3109876543",
+                    email = "juan.salamanca@outlook.com",
+                    schoolOrOrigin = "Colegio Salesiano Tunja",
+                    attended = true,
+                    ticketCode = "USTA-EVT-4910"
+                ),
+                EventRegistration(
+                    eventId = openDayId,
+                    eventTitle = "Open Day Santoto Tunja 2026 - 2027",
+                    fullName = "Mariana Andrea Castro",
+                    phone = "3156789012",
+                    email = "mariana.castro@hotmail.com",
+                    schoolOrOrigin = "Colegio de la Presentación",
+                    attended = false,
+                    ticketCode = "USTA-EVT-8321"
+                )
+            )
+            initialRegistrations.forEach { dao.insertRegistration(it) }
+        }
+
+        // Seed initial Campus News (Noticias USTA)
+        val newsCnt = dao.getNewsCount().first()
+        if (newsCnt == 0) {
+            val initialNews = listOf(
+                CampusNews(
+                    title = "Santoto Tunja abre admisiones 2026-2027 con descuentos especiales por pronto pago",
+                    summary = "Aprovecha descuentos de hasta el 15% por pago oportuno hasta el 31 de octubre en los 22 programas de pregrado de la Seccional Tunja.",
+                    content = """
+La Universidad Santo Tomás Seccional Tunja abre oficialmente el calendario de inscripciones y matrículas para el periodo académico 2026-2027. Los aspirantes que completen su matrícula antes del 31 de octubre podrán acceder a tarifas preferenciales y descuentos del 10% y 15% según el programa.
+
+Además, la institución ofrece financiación directa sin intermediarios bancarios ni codeudor, así como convenios de homologación con el SENA para tecnólogos que deseen profesionalizarse en menos tiempo. Para más información, comunícate con la Dirección de Admisiones al WhatsApp 317 510 5383.
+                    """.trimIndent(),
+                    category = "Admisiones",
+                    dateText = "19 OCT 2026",
+                    imageUrl = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop&q=80",
+                    author = "Dirección de Admisiones & Marketing",
+                    readTimeMinutes = 3,
+                    isFeatured = true
+                ),
+                CampusNews(
+                    title = "Microcredenciales para grado 11°: adelanta materias universitarias por solo $100.000",
+                    summary = "Una oportunidad única para que estudiantes de último año escolar inicien su formación superior y obtengan créditos homologables oficiales.",
+                    content = """
+El innovador modelo de Microcredenciales de la Universidad Santo Tomás Tunja permite a los jóvenes de grado 11° cursar asignaturas introductorias de programas como Ingeniería de Sistemas, Derecho, Administración y Diseño de Interacción por un valor simbólico de $100.000 COP.
+
+Al finalizar satisfactoriamente la microcredencial, el estudiante recibe una insignia digital y certificado con código de verificación que será homologado como crédito académico al matricularse en el pregrado correspondiente en la Santoto.
+                    """.trimIndent(),
+                    category = "Colegios",
+                    dateText = "18 OCT 2026",
+                    imageUrl = "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&auto=format&fit=crop&q=80",
+                    author = "Vicerrectoría Académica",
+                    readTimeMinutes = 2,
+                    isFeatured = true
+                ),
+                CampusNews(
+                    title = "Semillero de Inteligencia Artificial de la Santoto gana primer puesto en reto tecnológico",
+                    summary = "Estudiantes tomasinos presentaron una solución de visión computacional y modelos predictivos aplicada a la agricultura boyacense.",
+                    content = """
+El equipo de investigación de la Facultad de Ingeniería de Sistemas e Ingeniería de Datos de la Santoto Tunja se coronó campeón en el Hackathon Regional de Innovación 2026 con su proyecto 'AgroSense Tunja'.
+
+La herramienta utiliza modelos de redes neuronales convolucionales y sensores IoT para predecir plagas en cultivos de papa y cebolla, demostrando la alta calidad formativa y pertinencia social de los ingenieros tomasinos.
+                    """.trimIndent(),
+                    category = "Innovación & IA",
+                    dateText = "15 OCT 2026",
+                    imageUrl = "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80",
+                    author = "Facultad de Ingeniería",
+                    readTimeMinutes = 4,
+                    isFeatured = false
+                ),
+                CampusNews(
+                    title = "Nuevo programa de Nutrición y Dietética recibe registro calificado del Ministerio",
+                    summary = "La Seccional amplía su oferta en ciencias de la salud con un pregrado de 9 semestres enfocado en nutrición clínica y deportiva.",
+                    content = """
+Mediante la Resolución oficial del Ministerio de Educación Nacional, la Santoto Tunja suma a su catálogo académico el pregrado en Nutrición y Dietética. El programa cuenta con modernos laboratorios de evaluación nutricional, biofísica y bromatología en el Campus Av. Universitaria.
+
+Las inscripciones ya se encuentran habilitadas a través del portal SAC y la oficina de admisiones.
+                    """.trimIndent(),
+                    category = "Académico",
+                    dateText = "12 OCT 2026",
+                    imageUrl = "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&auto=format&fit=crop&q=80",
+                    author = "Comunicaciones USTA",
+                    readTimeMinutes = 3,
+                    isFeatured = false
+                )
+            )
+            dao.insertNewsList(initialNews)
         }
 
         // Seed RAG Markdown Documents from user's verified files

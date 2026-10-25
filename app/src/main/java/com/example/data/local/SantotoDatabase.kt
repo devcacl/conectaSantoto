@@ -5,13 +5,22 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.data.model.CampusEvent
+import com.example.data.model.CampusNews
 import com.example.data.model.CampusVisit
+import com.example.data.model.EventRegistration
 import com.example.data.model.Lead
 import com.example.data.model.RagDocument
 
 @Database(
-    entities = [Lead::class, CampusVisit::class, CampusEvent::class, RagDocument::class],
-    version = 3,
+    entities = [
+        Lead::class,
+        CampusVisit::class,
+        CampusEvent::class,
+        RagDocument::class,
+        CampusNews::class,
+        EventRegistration::class
+    ],
+    version = 4,
     exportSchema = false
 )
 abstract class SantotoDatabase : RoomDatabase() {

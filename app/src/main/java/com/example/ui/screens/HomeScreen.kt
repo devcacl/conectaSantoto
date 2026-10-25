@@ -29,12 +29,18 @@ import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Engineering
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.ViewInAr
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -65,7 +71,9 @@ import com.example.R
 import com.example.data.model.ProgramLevel
 import com.example.ui.components.SantotoActionCard
 import com.example.ui.theme.SantotoBg
+import com.example.ui.theme.SantotoGold
 import com.example.ui.theme.SantotoNavy
+import com.example.ui.theme.SantotoNavyDark
 import com.example.ui.theme.SantotoSuccess
 import com.example.ui.theme.SantotoYellow
 import com.example.viewmodel.SantotoViewModel
@@ -78,6 +86,7 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val events by viewModel.events.collectAsStateWithLifecycle()
+    val newsList by viewModel.news.collectAsStateWithLifecycle()
 
     var showLeadCaptureDialog by remember { mutableStateOf(false) }
     var leadName by remember { mutableStateOf("") }
@@ -501,6 +510,17 @@ fun HomeScreen(
             )
         }
 
+        item {
+            SantotoActionCard(
+                title = "Noticias & Actualidad USTA",
+                subtitle = "Convocatorias de becas, convenios, vida universitaria e innovación",
+                icon = Icons.Default.Newspaper,
+                badgeText = "BOLETÍN",
+                badgeColor = SantotoYellow,
+                onClick = { viewModel.navigateTo(Screen.News) }
+            )
+        }
+
         // 4. Próximos Eventos & Open Days
         item {
             Row(
@@ -526,106 +546,327 @@ fun HomeScreen(
         }
 
         item {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(events.take(4), key = { it.id }) { event ->
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(events.take(5), key = { it.id }) { event ->
                     Card(
                         modifier = Modifier
                             .width(260.dp)
-                            .clickable { viewModel.navigateTo(Screen.Events) },
+                            .clickable { viewModel.navigateTo(Screen.EventConfirmRegistration(event)) },
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                        Column {
+                            // Event Image
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(115.dp)
                             ) {
+                                AsyncImage(
+                                    model = event.imageUrl,
+                                    contentDescription = event.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.3f))
+                                )
                                 Surface(
                                     shape = RoundedCornerShape(6.dp),
-                                    color = SantotoYellow
+                                    color = SantotoYellow,
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp)
                                 ) {
                                     Text(
                                         text = event.dateBadge,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = SantotoNavy,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                    )
-                                }
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = SantotoNavy.copy(alpha = 0.08f)
-                                ) {
-                                    Text(
-                                        text = event.category,
                                         fontSize = 9.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = SantotoNavy.copy(alpha = 0.85f),
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = "${event.availableSpots} cupos",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SantotoGold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = event.title,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = SantotoNavy,
-                                maxLines = 2
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = event.location,
-                                fontSize = 11.sp,
-                                color = Color(0xFF64748B),
-                                maxLines = 1
-                            )
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = event.title,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SantotoNavyDark,
+                                    maxLines = 1
+                                )
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = event.location,
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF64748B),
+                                    maxLines = 1
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = SantotoNavy,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "Inscribirme",
+                                        color = Color.White,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        modifier = Modifier.padding(vertical = 5.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        // 5. Contact Info Box - Clean white card
+        // 5. NOTICIAS & ACTUALIDAD TOMASINA
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "NOTICIAS & ACTUALIDAD",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SantotoNavy,
+                    letterSpacing = 0.5.sp
+                )
+                Text(
+                    text = "Ver todas",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SantotoNavy,
+                    modifier = Modifier.clickable { viewModel.navigateTo(Screen.News) }
+                )
+            }
+        }
+
+        item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(newsList.take(4), key = { it.id }) { newsItem ->
+                    Card(
+                        modifier = Modifier
+                            .width(260.dp)
+                            .clickable { viewModel.navigateTo(Screen.News) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    ) {
+                        Column {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(115.dp)
+                            ) {
+                                AsyncImage(
+                                    model = newsItem.imageUrl,
+                                    contentDescription = newsItem.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = SantotoNavy.copy(alpha = 0.85f),
+                                    modifier = Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = newsItem.category,
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SantotoGold,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = newsItem.title,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SantotoNavyDark,
+                                    maxLines = 2
+                                )
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = newsItem.dateText,
+                                    fontSize = 10.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 5. Professional Institutional Footer (No emojis, official contact info & portal)
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Column(modifier = Modifier.padding(14.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = SantotoNavy,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.School,
+                                    contentDescription = null,
+                                    tint = SantotoYellow,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Universidad Santo Tomás",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SantotoNavy
+                            )
+                            Text(
+                                text = "Seccional Tunja • Código SNIES: 1708",
+                                fontSize = 11.sp,
+                                color = Color(0xFF64748B),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    androidx.compose.material3.HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Contact phone & WhatsApp
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Phone,
                             contentDescription = null,
                             tint = SantotoNavy,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Líneas de Atención Admisiones Tunja",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = SantotoNavy
+                            text = "Líneas de Atención: (608) 744 0404 • WhatsApp: 317 510 5383 / 317 514 1479",
+                            fontSize = 11.sp,
+                            color = Color(0xFF334155),
+                            fontWeight = FontWeight.Medium
                         )
                     }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "📱 WhatsApp: 317 510 5383 • 317 514 1479\n✉️ admisiones@ustatunja.edu.co\n🌐 santototunja.edu.co/admisiones",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF475569),
-                        lineHeight = 18.sp
-                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Email
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = null,
+                            tint = SantotoNavy,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "admisiones@ustatunja.edu.co",
+                            fontSize = 11.sp,
+                            color = Color(0xFF334155),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Web portal
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Language,
+                            contentDescription = null,
+                            tint = SantotoNavy,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Portal Oficial: santototunja.edu.co / admisiones",
+                            fontSize = 11.sp,
+                            color = SantotoNavy,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Locations
+                    Row(verticalAlignment = Alignment.Top) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = SantotoNavy,
+                            modifier = Modifier.size(16.dp).padding(top = 2.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Sedes: Campus Centro (Cra. 19 # 11-64) | Campus Av. Universitaria (Cll. 19 # 22-64), Tunja, Boyacá",
+                            fontSize = 11.sp,
+                            color = Color(0xFF64748B),
+                            lineHeight = 16.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFFF8FAFC)
+                    ) {
+                        Text(
+                            text = "Institución de Educación Superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.",
+                            fontSize = 9.sp,
+                            color = Color(0xFF94A3B8),
+                            modifier = Modifier.padding(8.dp),
+                            lineHeight = 13.sp
+                        )
+                    }
                 }
             }
         }
     }
 }
+

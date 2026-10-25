@@ -18,9 +18,12 @@ import com.example.ui.components.SantotoBottomBar
 import com.example.ui.components.SantotoHeader
 import com.example.ui.screens.AdmissionsDashboardScreen
 import com.example.ui.screens.ChatbotScreen
+import com.example.ui.screens.EventRegistrationScreen
+import com.example.ui.screens.EventTicketScreen
 import com.example.ui.screens.EventsScreen
 import com.example.ui.screens.Explora360Screen
 import com.example.ui.screens.HomeScreen
+import com.example.ui.screens.NewsScreen
 import com.example.ui.screens.ProgramsCatalogScreen
 import com.example.ui.screens.ScheduleVisitScreen
 import com.example.ui.screens.VocationalTestScreen
@@ -59,6 +62,10 @@ fun SantotoApp(
         Screen.ScheduleVisit -> "Agendar Visita al Campus"
         Screen.ProgramsCatalog -> "Programas Académicos"
         Screen.Events -> "Próximos Eventos & Open Day"
+        Screen.News -> "Noticias & Actualidad USTA"
+        is Screen.EventConfirmRegistration -> "Inscripción al Evento"
+        is Screen.EventTicket -> "Boleto Oficial de Acceso"
+        is Screen.NewsDetail -> "Noticia USTA"
         Screen.AdmissionsPanel -> "Panel de Admisiones"
         is Screen.ProgramDetail -> "Ficha de Programa"
     }
@@ -68,7 +75,10 @@ fun SantotoApp(
         UserRole.PROFESIONAL_ADMISIONES -> "Portal Administrativo Tunja"
     }
 
-    val shouldShowBottomBar = (!isVrModeEnabled || currentScreen !is Screen.Explora360) && currentScreen !is Screen.Chatbot
+    val shouldShowBottomBar = (!isVrModeEnabled || currentScreen !is Screen.Explora360) &&
+            currentScreen !is Screen.Chatbot &&
+            currentScreen !is Screen.EventConfirmRegistration &&
+            currentScreen !is Screen.EventTicket
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -106,7 +116,8 @@ fun SantotoApp(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (currentScreen) {
+            val screen = currentScreen
+            when (screen) {
                 Screen.Home -> HomeScreen(viewModel = viewModel)
                 Screen.Chatbot -> ChatbotScreen(viewModel = viewModel)
                 Screen.Explora360 -> Explora360Screen(viewModel = viewModel)
@@ -114,6 +125,10 @@ fun SantotoApp(
                 Screen.ScheduleVisit -> ScheduleVisitScreen(viewModel = viewModel)
                 Screen.ProgramsCatalog -> ProgramsCatalogScreen(viewModel = viewModel)
                 Screen.Events -> EventsScreen(viewModel = viewModel)
+                Screen.News -> NewsScreen(viewModel = viewModel)
+                is Screen.EventConfirmRegistration -> EventRegistrationScreen(event = screen.event, viewModel = viewModel)
+                is Screen.EventTicket -> EventTicketScreen(registration = screen.registration, event = screen.event, viewModel = viewModel)
+                is Screen.NewsDetail -> NewsScreen(viewModel = viewModel)
                 Screen.AdmissionsPanel -> AdmissionsDashboardScreen(viewModel = viewModel)
                 is Screen.ProgramDetail -> ProgramsCatalogScreen(viewModel = viewModel)
             }

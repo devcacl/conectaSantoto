@@ -1,40 +1,40 @@
 package com.example.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-  primary = SantotoGold,
-  onPrimary = SantotoNavyDark,
-  primaryContainer = SantotoRoyal,
-  onPrimaryContainer = SantotoGoldLight,
-  secondary = SantotoCyan,
-  onSecondary = SantotoNavyDark,
-  background = SantotoNavyDark,
-  onBackground = SantotoSurface,
-  surface = SantotoCardNavy,
-  onSurface = SantotoSurface,
-  surfaceVariant = SantotoRoyal,
-  onSurfaceVariant = SantotoSurfaceVariant
+  primary = SantotoNavy,
+  onPrimary = Color.White,
+  primaryContainer = SantotoNavy,
+  onPrimaryContainer = Color.White,
+  secondary = SantotoYellow,
+  onSecondary = SantotoNavy,
+  background = SantotoBg,
+  onBackground = SantotoTextPrimary,
+  surface = Color.White,
+  onSurface = SantotoTextPrimary,
+  surfaceVariant = SantotoSurfaceVariant,
+  onSurfaceVariant = SantotoTextSecondary
 )
 
 private val LightColorScheme = lightColorScheme(
   primary = SantotoNavy,
-  onPrimary = SantotoSurface,
-  primaryContainer = SantotoRoyal,
-  onPrimaryContainer = SantotoSurface,
-  secondary = SantotoGold,
-  onSecondary = SantotoNavyDark,
+  onPrimary = Color.White,
+  primaryContainer = SantotoNavy,
+  onPrimaryContainer = Color.White,
+  secondary = SantotoYellow,
+  onSecondary = SantotoNavy,
   secondaryContainer = SantotoGoldLight,
-  onSecondaryContainer = SantotoNavyDark,
-  tertiary = SantotoCyan,
-  onTertiary = SantotoSurface,
+  onSecondaryContainer = SantotoNavy,
+  tertiary = SantotoNavy,
+  onTertiary = Color.White,
   background = SantotoBg,
   onBackground = SantotoTextPrimary,
-  surface = SantotoSurface,
+  surface = Color.White,
   onSurface = SantotoTextPrimary,
   surfaceVariant = SantotoSurfaceVariant,
   onSurfaceVariant = SantotoTextSecondary
@@ -42,8 +42,8 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun MyApplicationTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  dynamicColor: Boolean = false, // Keep institutional branding consistent
+  darkTheme: Boolean = false, // Institutional branding always clean and high-contrast
+  dynamicColor: Boolean = false,
   content: @Composable () -> Unit,
 ) {
   val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
@@ -54,3 +54,4 @@ fun MyApplicationTheme(
     content = content
   )
 }
+

@@ -37,6 +37,7 @@ import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ScreenRotation
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.ViewInAr
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -86,8 +87,9 @@ fun Explora360Screen(
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var loadingProgress by remember { mutableIntStateOf(0) }
-    var hasError by remember { mutableStateOf(false) }
     var isGyroscopeActive by remember { mutableStateOf(true) }
+    var isPitchInverted by remember { mutableStateOf(false) }
+    var hasError by remember { mutableStateOf(false) }
 
     // Native Gyroscope / Motion Sensor Integration for 360 & VR
     val sensorManager = remember { context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager }
@@ -97,7 +99,7 @@ fun Explora360Screen(
             ?: sensorManager?.getDefaultSensor(Sensor.TYPE_ORIENTATION)
     }
 
-    DisposableEffect(isGyroscopeActive, webViewInstance) {
+    DisposableEffect(isGyroscopeActive, isPitchInverted, webViewInstance) {
         if (sensorManager == null || rotationSensor == null || !isGyroscopeActive) {
             onDispose { }
         } else {
@@ -107,8 +109,8 @@ fun Explora360Screen(
                 override fun onSensorChanged(event: SensorEvent?) {
                     if (event == null) return
                     val now = System.currentTimeMillis()
-                    // Throttle event dispatch to ~60 FPS (every 16ms)
-                    if (now - lastDispatchTime < 16) return
+                    // Throttle event dispatch to ~30 FPS (every 33ms) to avoid queueing
+                    if (now - lastDispatchTime < 33) return
                     lastDispatchTime = now
 
                     val targetWebView = webViewInstance ?: return
@@ -119,23 +121,20 @@ fun Explora360Screen(
                         val rotationMatrix = FloatArray(9)
                         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
 
-                        // Remap coordinate system for portrait phone
-                        val remappedMatrix = FloatArray(9)
-                        SensorManager.remapCoordinateSystem(
-                            rotationMatrix,
-                            SensorManager.AXIS_X,
-                            SensorManager.AXIS_Z,
-                            remappedMatrix
-                        )
-
                         val orientation = FloatArray(3)
-                        SensorManager.getOrientation(remappedMatrix, orientation)
+                        SensorManager.getOrientation(rotationMatrix, orientation)
 
-                        // Convert radians to degrees adhering to W3C DeviceOrientation specification
-                        var alpha = Math.toDegrees(-orientation[0].toDouble()) // Azimuth / Compass heading
-                        if (alpha < 0) alpha += 360.0
-                        val beta = Math.toDegrees(orientation[1].toDouble())   // Pitch (tilt front/back)
-                        val gamma = Math.toDegrees(-orientation[2].toDouble()) // Roll (tilt left/right)
+                        // Convert radians to degrees.
+                        // CRITICAL: In Android, pitch (orientation[1]) is negative when tilted upright (-90°).
+                        // In W3C DeviceOrientation spec, upright portrait beta is +90°.
+                        // Negating pitch corrects the 180° upside-down tilt.
+                        val rawAzimuth = Math.toDegrees(orientation[0].toDouble())
+                        val rawPitch = Math.toDegrees(orientation[1].toDouble())
+                        val rawRoll = Math.toDegrees(orientation[2].toDouble())
+
+                        var beta = if (!isPitchInverted) -rawPitch else rawPitch
+                        val gamma = -rawRoll
+                        var alpha = (if (rawAzimuth < 0) rawAzimuth + 360.0 else rawAzimuth)
 
                         val js = "if(window.__bridgeSensor){window.__bridgeSensor($alpha, $beta, $gamma);}"
                         targetWebView.post {
@@ -143,8 +142,10 @@ fun Explora360Screen(
                         }
                     } else if (event.sensor.type == Sensor.TYPE_ORIENTATION) {
                         val alpha = event.values[0].toDouble()
-                        val beta = event.values[1].toDouble()
-                        val gamma = event.values[2].toDouble()
+                        val rawPitch = event.values[1].toDouble()
+                        val rawRoll = event.values[2].toDouble()
+                        val beta = if (!isPitchInverted) -rawPitch else rawPitch
+                        val gamma = -rawRoll
 
                         val js = "if(window.__bridgeSensor){window.__bridgeSensor($alpha, $beta, $gamma);}"
                         targetWebView.post {
@@ -159,7 +160,7 @@ fun Explora360Screen(
             sensorManager.registerListener(
                 sensorListener,
                 rotationSensor,
-                SensorManager.SENSOR_DELAY_GAME
+                SensorManager.SENSOR_DELAY_UI
             )
 
             onDispose {
@@ -173,7 +174,7 @@ fun Explora360Screen(
             .fillMaxSize()
             .background(Color(0xFF0F172A))
     ) {
-        // TOP CONTROL HEADER - ONLY ONE HEADER AS REQUESTED (NO BOTTOM TIPS OR LABELS)
+        // TOP CONTROL HEADER - COMPACT TITLE AND GENEROUS BUTTON SPACING
         Surface(
             color = SantotoNavy,
             modifier = Modifier.fillMaxWidth(),
@@ -182,7 +183,7 @@ fun Explora360Screen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -194,20 +195,20 @@ fun Explora360Screen(
                         imageVector = Icons.Default.ViewInAr,
                         contentDescription = "Recorrido 360",
                         tint = SantotoYellow,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Recorrido Virtual Oficial 360°",
-                            fontSize = 13.sp,
+                            text = "Tour 360°",
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "360.santototunja.edu.co",
-                                fontSize = 10.sp,
+                                text = "Sede Tunja",
+                                fontSize = 9.sp,
                                 color = SantotoYellow
                             )
                             if (isGyroscopeActive) {
@@ -217,7 +218,7 @@ fun Explora360Screen(
                                     color = SantotoYellow.copy(alpha = 0.2f)
                                 ) {
                                     Text(
-                                        text = "SENSOR ACTIVO",
+                                        text = "GIROSCOPIO ON",
                                         fontSize = 8.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoYellow,
@@ -229,39 +230,43 @@ fun Explora360Screen(
                     }
                 }
 
+                // Generously separated buttons
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Toggle Gyroscope Sensor / VR Mode in Tour
+                    // Toggle Gyroscope Sensor
                     IconButton(
                         onClick = {
                             isGyroscopeActive = !isGyroscopeActive
-                            val js = """
-                                (function() {
-                                    if (window.TDV && window.TDV.Tour && window.TDV.Tour.Script) {
-                                        try {
-                                            if (typeof window.TDV.Tour.Script.toggleVR === 'function') {
-                                                window.TDV.Tour.Script.toggleVR();
-                                                return;
-                                            }
-                                        } catch(e) {}
-                                    }
-                                    var btn = document.querySelector('[title*="VR"], [title*="Cardboard"], [title*="Gafas"], [title*="Giroscopio"], [class*="vr"], [class*="gyro"]');
-                                    if (btn) btn.click();
-                                })();
-                            """.trimIndent()
-                            webViewInstance?.evaluateJavascript(js, null)
                         },
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(if (isGyroscopeActive) SantotoYellow else Color.White.copy(alpha = 0.12f))
+                            .background(if (isGyroscopeActive) SantotoYellow else Color.White.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.ScreenRotation,
-                            contentDescription = "Giroscopio / Modo VR",
+                            contentDescription = "Giroscopio",
                             tint = if (isGyroscopeActive) SantotoNavy else Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    // Toggle Invert Tilt (Vertical Flip)
+                    IconButton(
+                        onClick = {
+                            isPitchInverted = !isPitchInverted
+                        },
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(if (isPitchInverted) SantotoYellow else Color.White.copy(alpha = 0.15f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SwapVert,
+                            contentDescription = "Invertir Eje Vertical",
+                            tint = if (isPitchInverted) SantotoNavy else Color.White,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -274,9 +279,9 @@ fun Explora360Screen(
                             webViewInstance?.reload()
                         },
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.12f))
+                            .background(Color.White.copy(alpha = 0.15f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
@@ -286,14 +291,14 @@ fun Explora360Screen(
                         )
                     }
 
-                    // Open in Chrome / Native VR app
+                    // Open in Browser
                     IconButton(
                         onClick = {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(official360Url))
                             context.startActivity(intent)
                         },
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(38.dp)
                             .clip(CircleShape)
                             .background(SantotoYellow)
                     ) {
@@ -371,17 +376,30 @@ fun Explora360Screen(
                             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                                 isLoading = true
                                 hasError = false
+                                // Pre-inject DeviceOrientation API polyfill before 3DVista checks for sensors
+                                val preInitJs = """
+                                    (function() {
+                                        if (typeof window.DeviceOrientationEvent === 'undefined') {
+                                            window.DeviceOrientationEvent = function() {};
+                                        }
+                                        if (typeof window.DeviceMotionEvent === 'undefined') {
+                                            window.DeviceMotionEvent = function() {};
+                                        }
+                                        window.DeviceOrientationEvent.requestPermission = function() { return Promise.resolve('granted'); };
+                                        window.DeviceMotionEvent.requestPermission = function() { return Promise.resolve('granted'); };
+                                    })();
+                                """.trimIndent()
+                                view?.evaluateJavascript(preInitJs, null)
                             }
 
                             override fun onPageFinished(view: WebView?, url: String?) {
                                 isLoading = false
-                                // Inject high-performance sensor bridge for 3DVista Player
+                                // Sensor bridge without auto-motion and disabling unwanted auto-rotation
                                 val injectionJs = """
                                     (function() {
                                         window.__bridgeSensor = function(alpha, beta, gamma) {
-                                            var oEvent;
                                             try {
-                                                oEvent = new DeviceOrientationEvent('deviceorientation', {
+                                                var oEvent = new DeviceOrientationEvent('deviceorientation', {
                                                     alpha: alpha,
                                                     beta: beta,
                                                     gamma: gamma,
@@ -389,40 +407,59 @@ fun Explora360Screen(
                                                     bubbles: true,
                                                     cancelable: false
                                                 });
+                                                window.dispatchEvent(oEvent);
                                             } catch(e) {
-                                                oEvent = document.createEvent('DeviceOrientationEvent');
-                                                if (oEvent.initDeviceOrientationEvent) {
-                                                    oEvent.initDeviceOrientationEvent('deviceorientation', true, false, alpha, beta, gamma, true);
-                                                } else {
-                                                    oEvent = new Event('deviceorientation');
-                                                    oEvent.alpha = alpha;
-                                                    oEvent.beta = beta;
-                                                    oEvent.gamma = gamma;
-                                                    oEvent.absolute = true;
-                                                }
+                                                try {
+                                                    var oEvent = document.createEvent('DeviceOrientationEvent');
+                                                    if (oEvent.initDeviceOrientationEvent) {
+                                                        oEvent.initDeviceOrientationEvent('deviceorientation', true, false, alpha, beta, gamma, true);
+                                                        window.dispatchEvent(oEvent);
+                                                    }
+                                                } catch(err) {}
                                             }
-                                            window.dispatchEvent(oEvent);
-
-                                            try {
-                                                var mEvent = new DeviceMotionEvent('devicemotion', {
-                                                    accelerationIncludingGravity: { x: gamma / 10, y: beta / 10, z: 9.8 },
-                                                    rotationRate: { alpha: alpha, beta: beta, gamma: gamma },
-                                                    interval: 16
-                                                });
-                                                window.dispatchEvent(mEvent);
-                                            } catch(e) {}
                                         };
 
-                                        // Try triggering gyro/VR button if present
-                                        setTimeout(function() {
-                                            if (window.TDV && window.TDV.Tour && window.TDV.Tour.Script) {
-                                                try {
-                                                    if (typeof window.TDV.Tour.Script.enableVR === 'function') {
-                                                        window.TDV.Tour.Script.enableVR();
+                                        // Stop unintended autorotation in 3DVista and activate sensor mode
+                                        function haltAutoRotation() {
+                                            try {
+                                                if (window.TDV && window.TDV.Tour && window.TDV.Tour.Script) {
+                                                    var script = window.TDV.Tour.Script;
+                                                    var players = (typeof script.getCurrentPlayers === 'function') ? script.getCurrentPlayers() : [];
+                                                    players.forEach(function(p) {
+                                                        try {
+                                                            p.set('gyroscopeEnabled', true);
+                                                            var cam = p.get('camera');
+                                                            if (cam) {
+                                                                cam.set('automaticRotationSpeed', 0);
+                                                                cam.set('timeToIdle', 99999999);
+                                                                var s1 = cam.get('initialSequence');
+                                                                if (s1 && typeof s1.pause === 'function') s1.pause();
+                                                                var s2 = cam.get('idleSequence');
+                                                                if (s2 && typeof s2.pause === 'function') s2.pause();
+                                                            }
+                                                        } catch(err) {}
+                                                    });
+                                                }
+                                                if (window.tour && window.tour.player) {
+                                                    var cam = (typeof window.tour.player.getCamera === 'function') ? window.tour.player.getCamera() : null;
+                                                    if (cam && typeof cam.set === 'function') {
+                                                        cam.set('automaticRotationSpeed', 0);
+                                                        cam.set('timeToIdle', 99999999);
                                                     }
-                                                } catch(e) {}
-                                            }
-                                        }, 1500);
+                                                }
+                                                var viewer = document.getElementById('viewer');
+                                                if (viewer) {
+                                                    viewer.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: 200, clientY: 200 }));
+                                                    viewer.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: 200, clientY: 200 }));
+                                                }
+                                            } catch(e) {}
+                                        }
+
+                                        setTimeout(haltAutoRotation, 200);
+                                        setTimeout(haltAutoRotation, 600);
+                                        setTimeout(haltAutoRotation, 1200);
+                                        setTimeout(haltAutoRotation, 2500);
+                                        setTimeout(haltAutoRotation, 4000);
                                     })();
                                 """.trimIndent()
                                 evaluateJavascript(injectionJs, null)

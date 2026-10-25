@@ -7,7 +7,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.data.model.CampusEvent
+import com.example.data.model.CampusNews
 import com.example.data.model.CampusVisit
+import com.example.data.model.EventRegistration
 import com.example.data.model.Lead
 import com.example.data.model.LeadStatus
 import com.example.data.model.RagDocument
@@ -104,4 +106,45 @@ interface SantotoDao {
 
     @Query("SELECT COUNT(*) FROM rag_documents")
     fun getRagDocumentCount(): Flow<Int>
+
+    // --- CAMPUS NEWS (NOTICIAS) ---
+    @Query("SELECT * FROM news ORDER BY createdAt DESC")
+    fun getAllNews(): Flow<List<CampusNews>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNews(news: CampusNews): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNewsList(newsList: List<CampusNews>)
+
+    @Update
+    suspend fun updateNews(news: CampusNews)
+
+    @Delete
+    suspend fun deleteNews(news: CampusNews)
+
+    @Query("SELECT COUNT(*) FROM news")
+    fun getNewsCount(): Flow<Int>
+
+    // --- EVENT REGISTRATIONS (INSCRIPCIONES Y ASISTENCIA) ---
+    @Query("SELECT * FROM event_registrations ORDER BY registeredAt DESC")
+    fun getAllRegistrations(): Flow<List<EventRegistration>>
+
+    @Query("SELECT * FROM event_registrations WHERE eventId = :eventId ORDER BY registeredAt DESC")
+    fun getRegistrationsForEvent(eventId: Long): Flow<List<EventRegistration>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRegistration(registration: EventRegistration): Long
+
+    @Update
+    suspend fun updateRegistration(registration: EventRegistration)
+
+    @Delete
+    suspend fun deleteRegistration(registration: EventRegistration)
+
+    @Query("UPDATE event_registrations SET attended = :attended WHERE id = :registrationId")
+    suspend fun updateAttendance(registrationId: Long, attended: Boolean)
+
+    @Query("SELECT COUNT(*) FROM event_registrations WHERE eventId = :eventId")
+    fun getRegistrationCountForEvent(eventId: Long): Flow<Int>
 }

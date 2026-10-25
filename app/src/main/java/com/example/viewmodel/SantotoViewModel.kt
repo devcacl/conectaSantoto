@@ -9,6 +9,8 @@ import com.example.data.model.CampusEvent
 import com.example.data.model.CampusTourLocation
 import com.example.data.model.CampusVisit
 import com.example.data.model.ChatMessage
+import com.example.data.model.CampusNews
+import com.example.data.model.EventRegistration
 import com.example.data.model.FacultyCategory
 import com.example.data.model.Lead
 import com.example.data.model.LeadStatus
@@ -21,6 +23,7 @@ import com.example.data.rag.SantotoKnowledgeBase
 import com.example.data.rag.SantotoRagEngine
 import com.example.data.rag.VocationalTestData
 import com.example.data.repository.SantotoRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,7 +44,11 @@ sealed class Screen {
     object ScheduleVisit : Screen()
     object ProgramsCatalog : Screen()
     object Events : Screen()
+    object News : Screen()
     data class ProgramDetail(val program: AcademicProgram) : Screen()
+    data class EventConfirmRegistration(val event: CampusEvent) : Screen()
+    data class EventTicket(val registration: EventRegistration, val event: CampusEvent) : Screen()
+    data class NewsDetail(val news: CampusNews) : Screen()
     object AdmissionsPanel : Screen()
 }
 
@@ -103,6 +110,15 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
     val events: StateFlow<List<CampusEvent>> = repository.allEvents
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val news: StateFlow<List<CampusNews>> = repository.allNews
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val allRegistrations: StateFlow<List<EventRegistration>> = repository.allRegistrations
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun getRegistrationsForEvent(eventId: Long): Flow<List<EventRegistration>> =
+        repository.getRegistrationsForEvent(eventId)
+
     fun createEvent(
         title: String,
         dateBadge: String,
@@ -111,6 +127,9 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
         location: String,
         category: String,
         description: String,
+        imageUrl: String = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop&q=80",
+        capacity: Int = 60,
+        availableSpots: Int = 45,
         isFeatured: Boolean = true
     ) {
         viewModelScope.launch {
@@ -123,6 +142,9 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
                     location = location,
                     category = category,
                     description = description,
+                    imageUrl = imageUrl,
+                    capacity = capacity,
+                    availableSpots = availableSpots,
                     isFeatured = isFeatured
                 )
             )
@@ -138,6 +160,74 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
     fun deleteEvent(event: CampusEvent) {
         viewModelScope.launch {
             repository.deleteEvent(event)
+        }
+    }
+
+    // --- News CRUD ---
+    fun createNews(
+        title: String,
+        summary: String,
+        content: String,
+        category: String,
+        dateText: String,
+        imageUrl: String = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
+        author: String = "Dirección de Comunicaciones USTA Tunja",
+        readTimeMinutes: Int = 3,
+        isFeatured: Boolean = false
+    ) {
+        viewModelScope.launch {
+            repository.insertNews(
+                CampusNews(
+                    title = title,
+                    summary = summary,
+                    content = content,
+                    category = category,
+                    dateText = dateText,
+                    imageUrl = imageUrl,
+                    author = author,
+                    readTimeMinutes = readTimeMinutes,
+                    isFeatured = isFeatured
+                )
+            )
+        }
+    }
+
+    fun updateNews(newsItem: CampusNews) {
+        viewModelScope.launch {
+            repository.updateNews(newsItem)
+        }
+    }
+
+    fun deleteNews(newsItem: CampusNews) {
+        viewModelScope.launch {
+            repository.deleteNews(newsItem)
+        }
+    }
+
+    // --- Event Registration & Attendance ---
+    fun updateAttendance(registrationId: Long, attended: Boolean) {
+        viewModelScope.launch {
+            repository.updateAttendance(registrationId, attended)
+        }
+    }
+
+    fun registerForEvent(
+        event: CampusEvent,
+        fullName: String,
+        phone: String,
+        email: String,
+        school: String,
+        onComplete: (EventRegistration) -> Unit
+    ) {
+        viewModelScope.launch {
+            val registration = repository.registerForEvent(
+                event = event,
+                fullName = fullName,
+                phone = phone,
+                email = email,
+                school = school
+            )
+            onComplete(registration)
         }
     }
 

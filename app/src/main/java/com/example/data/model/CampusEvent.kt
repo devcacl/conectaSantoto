@@ -14,6 +14,9 @@ data class CampusEvent(
     val location: String,
     val category: String,
     val description: String,
+    val imageUrl: String = "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop&q=80",
+    val capacity: Int = 60,
+    val availableSpots: Int = 45,
     val isFeatured: Boolean = true,
     val createdAt: Long = System.currentTimeMillis()
 )
