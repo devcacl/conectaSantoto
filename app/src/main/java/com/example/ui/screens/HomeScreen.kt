@@ -613,7 +613,8 @@ fun HomeScreen(
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = SantotoNavyDark,
-                                    maxLines = 1
+                                    maxLines = 2,
+                                    minLines = 2
                                 )
                                 Spacer(modifier = Modifier.height(3.dp))
                                 Text(

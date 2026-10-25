@@ -8,10 +8,25 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.components.SantotoBottomBar
@@ -44,6 +59,51 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private const val PIN_PLACEHOLDER = "MY_ADMIN_PIN"
+
+/** Acceso provisional al panel administrativo; reemplazar por Firebase Auth antes de produccion. */
+@Composable
+private fun AdminPinDialog(onDismiss: () -> Unit, onAuthorized: () -> Unit) {
+    var pin by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf(false) }
+    val configured = BuildConfig.ADMIN_PIN.isNotBlank() && BuildConfig.ADMIN_PIN != PIN_PLACEHOLDER
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Acceso Administrativo", fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                Text(
+                    if (configured) "Ingresa el PIN del equipo de Admisiones."
+                    else "El acceso administrativo no está configurado. Define ADMIN_PIN en el archivo .env.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (configured) {
+                    OutlinedTextField(
+                        value = pin,
+                        onValueChange = { pin = it; error = false },
+                        label = { Text("PIN") },
+                        singleLine = true,
+                        isError = error,
+                        supportingText = { if (error) Text("PIN incorrecto") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if (configured) {
+                TextButton(onClick = { if (pin == BuildConfig.ADMIN_PIN) onAuthorized() else error = true }) {
+                    Text("Ingresar")
+                }
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+    )
+}
+
 @Composable
 fun SantotoApp(
     viewModel: SantotoViewModel = viewModel()
@@ -51,6 +111,17 @@ fun SantotoApp(
     val currentRole by viewModel.currentRole.collectAsStateWithLifecycle()
     val currentScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
     val isVrModeEnabled by viewModel.isVrModeEnabled.collectAsStateWithLifecycle()
+
+    var showAdminPinDialog by remember { mutableStateOf(false) }
+    if (showAdminPinDialog) {
+        AdminPinDialog(
+            onDismiss = { showAdminPinDialog = false },
+            onAuthorized = {
+                showAdminPinDialog = false
+                viewModel.setRole(UserRole.PROFESIONAL_ADMISIONES)
+            }
+        )
+    }
 
     val showHeaderBack = currentScreen !is Screen.Home && currentScreen !is Screen.AdmissionsPanel
 
@@ -87,12 +158,11 @@ fun SantotoApp(
                 SantotoHeader(
                     currentRole = currentRole,
                     onToggleRole = {
-                        val nextRole = if (currentRole == UserRole.ASPIRANTE) {
-                            UserRole.PROFESIONAL_ADMISIONES
+                        if (currentRole == UserRole.ASPIRANTE) {
+                            showAdminPinDialog = true
                         } else {
-                            UserRole.ASPIRANTE
+                            viewModel.setRole(UserRole.ASPIRANTE)
                         }
-                        viewModel.setRole(nextRole)
                     },
                     showBackButton = showHeaderBack,
                     onBackClick = { viewModel.navigateBack() },

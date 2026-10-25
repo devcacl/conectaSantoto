@@ -1,6 +1,7 @@
 package com.example.data.remote
 
 import android.util.Log
+import com.example.BuildConfig
 import com.example.data.model.ChatMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit
 object CohereClient {
 
     private const val TAG = "CohereClient"
-    private const val COHERE_API_KEY = "hkiUpjd0fIG40Za6PgFPVIHKaiDN1m6wq4SXuv08"
+    private const val PLACEHOLDER_KEY = "MY_COHERE_API_KEY"
     private const val ENDPOINT = "https://api.cohere.com/v2/chat"
     private const val MODEL = "command-r-08-2024"
 
@@ -30,6 +31,10 @@ object CohereClient {
         userMessage: String,
         history: List<ChatMessage> = emptyList()
     ): Result<String> = withContext(Dispatchers.IO) {
+        val apiKey = BuildConfig.COHERE_API_KEY
+        if (apiKey.isBlank() || apiKey == PLACEHOLDER_KEY) {
+            return@withContext Result.failure(Exception("COHERE_API_KEY no configurada"))
+        }
         try {
             val messagesArray = JSONArray()
 
@@ -65,7 +70,7 @@ object CohereClient {
             val requestBody = jsonPayload.toString().toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(ENDPOINT)
-                .addHeader("Authorization", "Bearer $COHERE_API_KEY")
+                .addHeader("Authorization", "Bearer $apiKey")
                 .addHeader("Content-Type", "application/json")
                 .post(requestBody)
                 .build()

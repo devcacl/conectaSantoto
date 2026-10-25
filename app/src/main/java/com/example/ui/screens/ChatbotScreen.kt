@@ -194,8 +194,8 @@ fun ChatbotScreen(
             }
         }
 
-        // Quick Suggestion Chips
-        LazyRow(
+        // Quick Suggestion Chips (el saludo inicial ya trae sus propias sugerencias)
+        if (chatMessages.size > 1) LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 6.dp),
@@ -249,8 +249,9 @@ fun ChatbotScreen(
                     onValueChange = { inputText = it },
                     placeholder = {
                         Text(
-                            text = "Pregúntale a Tommy Bot sobre carreras, costos...",
-                            fontSize = 12.5.sp,
+                            text = "Escribe tu pregunta...",
+                            fontSize = 14.sp,
+                            maxLines = 1,
                             color = Color(0xFF94A3B8)
                         )
                     },

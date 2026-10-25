@@ -53,6 +53,7 @@ import com.example.ui.theme.SantotoBg
 import com.example.ui.theme.SantotoCyan
 import com.example.ui.theme.SantotoGold
 import com.example.ui.theme.SantotoNavy
+import com.example.util.DateUtils
 import com.example.ui.theme.SantotoNavyDark
 import com.example.ui.theme.SantotoSuccess
 import com.example.viewmodel.SantotoViewModel
@@ -71,7 +72,9 @@ fun ScheduleVisitScreen(
     var email by remember { mutableStateOf("") }
     var school by remember { mutableStateOf("") }
     var selectedCampus by remember { mutableStateOf("Campus Av. Universitaria") }
-    var selectedDateText by remember { mutableStateOf("2026-10-15") }
+    val todayText = remember { DateUtils.dayText(0) }
+    val availableDays = remember { DateUtils.upcomingBusinessDays(8) }
+    var selectedDateText by remember { mutableStateOf(DateUtils.nextBusinessDay()) }
     var selectedTimeSlot by remember { mutableStateOf("09:00 AM - 11:00 AM") }
     var programInterest by remember { mutableStateOf("Ingeniería de Sistemas") }
     var visitorCount by remember { mutableIntStateOf(2) }
@@ -148,7 +151,8 @@ fun ScheduleVisitScreen(
                 InteractiveCalendarView(
                     selectedDateText = selectedDateText,
                     onDateSelected = { date -> selectedDateText = date },
-                    highlightedDates = setOf("2026-10-15", "2026-10-16", "2026-10-17", "2026-10-20", "2026-10-24")
+                    highlightedDates = availableDays,
+                    minDateText = todayText
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))

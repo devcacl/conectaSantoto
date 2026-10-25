@@ -50,11 +50,19 @@ fun InteractiveCalendarView(
     selectedDateText: String, // e.g. "2026-10-15"
     onDateSelected: (String) -> Unit,
     highlightedDates: Set<String> = emptySet(), // Dates that have events or visits
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    minDateText: String? = null // Fechas anteriores (yyyy-MM-dd) quedan deshabilitadas
 ) {
-    // We default to October 2026
-    var currentYear by remember { mutableIntStateOf(2026) }
-    var currentMonth by remember { mutableIntStateOf(10) } // 1-12
+    // Arranca en el mes de la fecha seleccionada (o el mes actual)
+    val initial = remember {
+        val parts = selectedDateText.split("-")
+        val cal = java.util.Calendar.getInstance()
+        val y = parts.getOrNull(0)?.toIntOrNull() ?: cal.get(java.util.Calendar.YEAR)
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: (cal.get(java.util.Calendar.MONTH) + 1)
+        y to m
+    }
+    var currentYear by remember { mutableIntStateOf(initial.first) }
+    var currentMonth by remember { mutableIntStateOf(initial.second) } // 1-12
 
     val monthNames = listOf(
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -181,6 +189,7 @@ fun InteractiveCalendarView(
                             val formattedDate = String.format("%04d-%02d-%02d", currentYear, currentMonth, dayNumber)
                             val isSelected = selectedDateText.startsWith(formattedDate)
                             val hasActivity = highlightedDates.any { it.startsWith(formattedDate) }
+                            val isPast = minDateText != null && formattedDate < minDateText
 
                             Box(
                                 modifier = Modifier
@@ -192,7 +201,7 @@ fun InteractiveCalendarView(
                                             else -> Color.Transparent
                                         }
                                     )
-                                    .clickable { onDateSelected(formattedDate) },
+                                    .clickable(enabled = !isPast) { onDateSelected(formattedDate) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(
@@ -205,6 +214,7 @@ fun InteractiveCalendarView(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = when {
                                             isSelected -> SantotoYellow
+                                            isPast -> Color(0xFFCBD5E1)
                                             else -> SantotoNavy
                                         }
                                     )

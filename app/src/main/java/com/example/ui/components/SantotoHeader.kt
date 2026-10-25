@@ -174,28 +174,6 @@ fun SantotoHeader(
                         )
                     }
 
-                    IconButton(
-                        onClick = { /* Notificaciones */ },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = SantotoYellow,
-                                    contentColor = SantotoNavy
-                                ) {
-                                    Text("2", fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notificaciones",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
                 }
             }
 

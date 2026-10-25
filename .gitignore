@@ -65,3 +65,4 @@ proguard/
 
 # AI Studio internal files
 .aistudio/
+docs/shots/
