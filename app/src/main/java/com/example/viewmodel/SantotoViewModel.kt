@@ -388,20 +388,10 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
     val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
     // Analytics Tracker for Chatbot
-    private val _totalQueriesCount = MutableStateFlow(42)
+    private val _totalQueriesCount = MutableStateFlow(0)
     val totalQueriesCount: StateFlow<Int> = _totalQueriesCount.asStateFlow()
 
-    private val _queriedProgramsStats = MutableStateFlow(
-        mapOf(
-            "Ingeniería de Sistemas" to 15,
-            "Derecho" to 11,
-            "Ingeniería de Datos e IA" to 8,
-            "Arquitectura" to 6,
-            "Cultura Física y Deporte" to 5,
-            "Administración de Empresas" to 4,
-            "Contaduría Pública" to 3
-        )
-    )
+    private val _queriedProgramsStats = MutableStateFlow<Map<String, Int>>(emptyMap())
     val queriedProgramsStats: StateFlow<Map<String, Int>> = _queriedProgramsStats.asStateFlow()
 
     fun sendChatMessage(text: String) {

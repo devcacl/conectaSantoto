@@ -133,13 +133,6 @@ fun SantotoBottomBar(
                         modifier = Modifier.weight(1f)
                     )
                     FloatingDockItem(
-                        icon = Icons.Default.People,
-                        label = "Leads",
-                        isSelected = currentScreen is Screen.AdmissionsPanel,
-                        onClick = { onNavigate(Screen.AdmissionsPanel) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    FloatingDockItem(
                         icon = Icons.Default.CalendarMonth,
                         label = "Visitas",
                         isSelected = currentScreen is Screen.ScheduleVisit,
@@ -155,7 +148,7 @@ fun SantotoBottomBar(
                     )
                     FloatingDockItem(
                         icon = Icons.Default.Analytics,
-                        label = "Métricas",
+                        label = "Panel",
                         isSelected = currentScreen is Screen.AdmissionsPanel,
                         onClick = { onNavigate(Screen.AdmissionsPanel) },
                         modifier = Modifier.weight(1f)

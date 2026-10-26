@@ -104,7 +104,7 @@ fun ProgramsCatalogScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { viewModel.setSearchQuery(it) },
-                    placeholder = { Text("Buscar programa (ej. Sistemas, Derecho, Datos...)", fontSize = 12.sp, color = Color.LightGray) },
+                    placeholder = { Text("Buscar programa...", fontSize = 14.sp, maxLines = 1, color = Color.LightGray) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -502,6 +502,23 @@ fun ProgramsCatalogScreen(
                             ) {
                                 Text("Agendar Visita", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = SantotoNavyDark)
                             }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        val sheetContext = androidx.compose.ui.platform.LocalContext.current
+                        Button(
+                            onClick = {
+                                openWhatsApp(
+                                    sheetContext,
+                                    "Hola, quiero información sobre ${prog.name} en la Santoto Tunja (costos, becas y fechas de inscripción)."
+                                )
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366), contentColor = Color.White),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Pedir información por WhatsApp", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }

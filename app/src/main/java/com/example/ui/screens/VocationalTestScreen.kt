@@ -164,14 +164,14 @@ fun VocationalTestScreen(
                             Surface(
                                 shape = CircleShape,
                                 color = SantotoNavy.copy(alpha = 0.08f),
-                                modifier = Modifier.size(36.dp)
+                                modifier = Modifier.size(44.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.School,
+                                        imageVector = facultyIcon(option.facultyWeight),
                                         contentDescription = null,
                                         tint = SantotoNavy,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 }
                             }
@@ -258,6 +258,10 @@ fun VocationalTestScreen(
                 }
 
                 item {
+                    AffinityChart(result.facultyScores)
+                }
+
+                item {
                     Text(
                         text = "PROGRAMAS RECOMENDADOS EN SANTOTO TUNJA",
                         fontSize = 12.sp,
@@ -319,6 +323,23 @@ fun VocationalTestScreen(
                             }
                         }
                     }
+                }
+
+                item {
+                    ResultLeadCard(
+                        topProgram = result.recommendedPrograms.firstOrNull() ?: "Programas Santoto Tunja",
+                        facultyLabel = facultyLabel(result.topFaculty),
+                        onSubmit = { name, phone, program, notes ->
+                            viewModel.captureLead(
+                                fullName = name,
+                                phone = phone,
+                                email = "",
+                                cityOrSchool = "",
+                                programInterest = program,
+                                notes = notes
+                            )
+                        }
+                    )
                 }
 
                 item {

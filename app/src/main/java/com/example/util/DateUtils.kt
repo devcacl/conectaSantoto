@@ -24,6 +24,18 @@ object DateUtils {
         "${badge(offsetDays)} ${it.get(Calendar.YEAR)}"
     }
 
+    /** Días completos desde hoy hasta [target] (yyyy-MM-dd); negativo si ya pasó. */
+    fun daysUntil(target: String): Int {
+        val p = target.split("-").map { it.toIntOrNull() ?: return 0 }
+        if (p.size != 3) return 0
+        fun midnight(c: Calendar) = c.apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val end = midnight(Calendar.getInstance().apply { set(p[0], p[1] - 1, p[2]) })
+        val now = midnight(Calendar.getInstance())
+        return ((end - now) / 86_400_000L).toInt()
+    }
+
     /** Primer día hábil (lun-vie) a partir de mañana, formato yyyy-MM-dd. */
     fun nextBusinessDay(): String {
         var offset = 1

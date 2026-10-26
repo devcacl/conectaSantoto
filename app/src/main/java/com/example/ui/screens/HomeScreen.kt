@@ -76,8 +76,12 @@ import com.example.ui.theme.SantotoNavy
 import com.example.ui.theme.SantotoNavyDark
 import com.example.ui.theme.SantotoSuccess
 import com.example.ui.theme.SantotoYellow
+import com.example.util.DateUtils
 import com.example.viewmodel.SantotoViewModel
 import com.example.viewmodel.Screen
+
+/** Fecha límite vigente de descuentos por pronto pago (yyyy-MM-dd). Actualizar cada periodo. */
+private const val EARLY_PAYMENT_DEADLINE = "2026-10-31"
 
 @Composable
 fun HomeScreen(
@@ -153,7 +157,7 @@ fun HomeScreen(
                                 color = SantotoYellow
                             )
                             Text(
-                                text = "Vigilada MinEducación • SNIES 1705",
+                                text = "Vigilada MinEducación • SNIES 1732",
                                 fontSize = 9.5.sp,
                                 color = Color.White.copy(alpha = 0.75f)
                             )
@@ -294,6 +298,55 @@ fun HomeScreen(
                             color = SantotoNavy,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
                         )
+                    }
+                }
+            }
+        }
+
+        // Cuenta regresiva de pronto pago (se oculta al vencer)
+        val daysLeft = DateUtils.daysUntil(EARLY_PAYMENT_DEADLINE)
+        if (daysLeft >= 0) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().testTag("early_payment_card"),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = SantotoYellow),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "DESCUENTOS POR PRONTO PAGO",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = SantotoNavy,
+                                letterSpacing = 0.5.sp
+                            )
+                            Text(
+                                text = when (daysLeft) {
+                                    0 -> "¡Último día para matricularte con descuento!"
+                                    1 -> "Queda 1 día para matricularte con descuento"
+                                    else -> "Quedan $daysLeft días para matricularte con descuento"
+                                },
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SantotoNavyDark
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = {
+                                    openWhatsApp(context, "Hola, quiero información sobre los descuentos por pronto pago de la Santoto Tunja.")
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SantotoNavy, contentColor = Color.White),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                            ) {
+                                Text("Hablar con un asesor", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
+                        }
                     }
                 }
             }
@@ -765,7 +818,7 @@ fun HomeScreen(
                                 color = SantotoNavy
                             )
                             Text(
-                                text = "Seccional Tunja • Código SNIES: 1708",
+                                text = "Seccional Tunja • Código SNIES: 1732",
                                 fontSize = 11.sp,
                                 color = Color(0xFF64748B),
                                 fontWeight = FontWeight.Medium
