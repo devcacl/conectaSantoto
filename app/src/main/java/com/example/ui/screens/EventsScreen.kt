@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoTextBody
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -99,7 +102,7 @@ fun EventsScreen(
                         Icon(
                             imageVector = Icons.Default.Event,
                             contentDescription = null,
-                            tint = if (selectedTab == 0) SantotoGold else Color(0xFFCBD5E1),
+                            tint = if (selectedTab == 0) SantotoGold else SantotoOutlineStrong,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -107,7 +110,7 @@ fun EventsScreen(
                             text = "Próximos Eventos",
                             fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
                             fontSize = 12.sp,
-                            color = if (selectedTab == 0) SantotoGold else Color(0xFFCBD5E1)
+                            color = if (selectedTab == 0) SantotoGold else SantotoOutlineStrong
                         )
                     }
                 }
@@ -121,7 +124,7 @@ fun EventsScreen(
                         Icon(
                             imageVector = Icons.Default.Newspaper,
                             contentDescription = null,
-                            tint = if (selectedTab == 1) SantotoGold else Color(0xFFCBD5E1),
+                            tint = if (selectedTab == 1) SantotoGold else SantotoOutlineStrong,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -129,7 +132,7 @@ fun EventsScreen(
                             text = "Noticias USTA",
                             fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
                             fontSize = 12.sp,
-                            color = if (selectedTab == 1) SantotoGold else Color(0xFFCBD5E1)
+                            color = if (selectedTab == 1) SantotoGold else SantotoOutlineStrong
                         )
                     }
                 }
@@ -242,7 +245,7 @@ fun EventsScreen(
                                 ) {
                                     Text(
                                         text = event.category.uppercase(),
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -292,7 +295,7 @@ fun EventsScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.AccessTime, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(13.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(event.time, fontSize = 11.5.sp, color = Color(0xFF475569))
+                                    Text(event.time, fontSize = 11.5.sp, color = SantotoTextBody)
                                 }
 
                                 Spacer(modifier = Modifier.height(4.dp))
@@ -300,7 +303,7 @@ fun EventsScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.LocationOn, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(13.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(event.location, fontSize = 11.5.sp, color = Color(0xFF475569))
+                                    Text(event.location, fontSize = 11.5.sp, color = SantotoTextBody)
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -308,7 +311,7 @@ fun EventsScreen(
                                 Text(
                                     text = event.description,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF334155),
+                                    color = SantotoTextBody,
                                     lineHeight = 16.sp
                                 )
 
@@ -329,7 +332,7 @@ fun EventsScreen(
                                     ) {
                                         Text(
                                             text = "Cupos disponibles en tiempo real:",
-                                            fontSize = 10.5.sp,
+                                            fontSize = 11.sp,
                                             color = Color.DarkGray
                                         )
                                         Text(
@@ -347,7 +350,7 @@ fun EventsScreen(
                                             .height(6.dp)
                                             .clip(RoundedCornerShape(3.dp)),
                                         color = if (event.availableSpots <= 10) Color(0xFFE53935) else SantotoGold,
-                                        trackColor = Color(0xFFE2E8F0)
+                                        trackColor = SantotoOutline
                                     )
                                 }
 

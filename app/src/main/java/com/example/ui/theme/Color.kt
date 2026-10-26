@@ -28,7 +28,13 @@ val SantotoCardLight = Color(0xFFFFFFFF)
 
 // Tipografía con excelente legibilidad y contraste
 val SantotoTextPrimary = Color(0xFF0F172A)
-val SantotoTextSecondary = Color(0xFF64748B)
+val SantotoTextBody = Color(0xFF475569)       // Texto de cuerpo (contraste 7.5:1 sobre blanco)
+val SantotoTextSecondary = Color(0xFF64748B)  // Texto de apoyo (contraste 4.8:1 sobre blanco)
+val SantotoTextMuted = Color(0xFF94A3B8)      // Solo decorativo/deshabilitado, no para texto esencial
+
+// Bordes y divisores
+val SantotoOutline = Color(0xFFE2E8F0)
+val SantotoOutlineStrong = Color(0xFFCBD5E1)
 
 // Estado
 val SantotoSuccess = Color(0xFF16A34A)

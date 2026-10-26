@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import com.example.ui.theme.SantotoTextBody
+import com.example.ui.theme.SantotoTextMuted
+import com.example.ui.theme.SantotoTextPrimary
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -207,7 +210,7 @@ fun ScheduleVisitScreen(
                         ) {
                             Text(
                                 text = slot,
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isSelected) SantotoGold else SantotoNavy,
                                 modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
@@ -258,7 +261,7 @@ fun ScheduleVisitScreen(
                                     )
                                     Text(
                                         text = desc,
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         color = if (isSelected) Color(0xFFCADBE8) else Color.Gray
                                     )
                                 }
@@ -283,14 +286,14 @@ fun ScheduleVisitScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     val visitFieldColors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF0F172A),
-                        unfocusedTextColor = Color(0xFF0F172A),
+                        focusedTextColor = SantotoTextPrimary,
+                        unfocusedTextColor = SantotoTextPrimary,
                         focusedLabelColor = SantotoNavy,
-                        unfocusedLabelColor = Color(0xFF475569),
+                        unfocusedLabelColor = SantotoTextBody,
                         focusedBorderColor = SantotoNavy,
-                        unfocusedBorderColor = Color(0xFF94A3B8),
+                        unfocusedBorderColor = SantotoTextMuted,
                         cursorColor = SantotoNavy,
-                        focusedContainerColor = Color(0xFFF8FAFC),
+                        focusedContainerColor = SantotoBg,
                         unfocusedContainerColor = Color(0xFFFFFFFF)
                     )
 
@@ -360,7 +363,7 @@ fun ScheduleVisitScreen(
                                             Text(
                                                 text = "$count",
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 10.sp,
+                                                fontSize = 11.sp,
                                                 color = if (visitorCount == count) SantotoGold else SantotoNavyDark
                                             )
                                         }
@@ -440,7 +443,7 @@ fun ScheduleVisitScreen(
                                 ) {
                                     Text(
                                         text = "PASE OFICIAL DE VISITA",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = SantotoNavyDark,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -467,11 +470,11 @@ fun ScheduleVisitScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("SEDE / CAMPUS", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("SEDE / CAMPUS", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text(selectedCampus, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("ACOMPAÑANTES", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("ACOMPAÑANTES", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text("$visitorCount Personas", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                             }
@@ -483,11 +486,11 @@ fun ScheduleVisitScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("FECHA", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("FECHA", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text(selectedDateText, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("HORARIO", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("HORARIO", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text(selectedTimeSlot, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                             }

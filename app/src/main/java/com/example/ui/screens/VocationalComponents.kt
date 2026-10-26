@@ -1,6 +1,8 @@
 package com.example.ui.screens
 
 import android.content.Intent
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoTextSecondary
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -114,7 +116,7 @@ internal fun AffinityChart(scores: Map<FacultyCategory, Int>) {
                         progress = { pct / 100f },
                         modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
                         color = SantotoGold,
-                        trackColor = Color(0xFFE2E8F0)
+                        trackColor = SantotoOutline
                     )
                 }
             }
@@ -152,7 +154,7 @@ internal fun ResultLeadCard(
             Text(
                 text = "Un asesor de Admisiones te contactará con costos, becas y fechas de inscripción.",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF64748B)
+                color = SantotoTextSecondary
             )
             Spacer(Modifier.height(10.dp))
             if (sent) {

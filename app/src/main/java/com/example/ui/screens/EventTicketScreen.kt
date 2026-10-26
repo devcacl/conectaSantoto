@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
 import android.content.ClipData
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoTextPrimary
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoSuccess
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -155,8 +159,8 @@ fun EventTicketScreen(
             // Success Notification Pill
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = Color(0xFF10B981).copy(alpha = 0.2f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF10B981))
+                color = SantotoSuccess.copy(alpha = 0.2f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SantotoSuccess)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -224,7 +228,7 @@ fun EventTicketScreen(
                                     Text(
                                         text = "USTA TUNJA",
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                                     )
@@ -237,7 +241,7 @@ fun EventTicketScreen(
                                     Text(
                                         text = event.category,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         color = Color.White,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
                                     )
@@ -261,7 +265,7 @@ fun EventTicketScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("FECHA DEL EVENTO", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                Text("FECHA DEL EVENTO", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.CalendarToday, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(13.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
@@ -270,7 +274,7 @@ fun EventTicketScreen(
                             }
 
                             Column(horizontalAlignment = Alignment.End) {
-                                Text("HORARIO", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                Text("HORARIO", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.AccessTime, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(13.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
@@ -282,7 +286,7 @@ fun EventTicketScreen(
                         Spacer(modifier = Modifier.height(10.dp))
 
                         Column {
-                            Text("LUGAR / CAMPUS", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                            Text("LUGAR / CAMPUS", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.LocationOn, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(13.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -291,7 +295,7 @@ fun EventTicketScreen(
                         }
 
                         Spacer(modifier = Modifier.height(14.dp))
-                        HorizontalDivider(color = Color(0xFFE2E8F0))
+                        HorizontalDivider(color = SantotoOutline)
                         Spacer(modifier = Modifier.height(14.dp))
 
                         // Attendee details
@@ -307,9 +311,9 @@ fun EventTicketScreen(
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
-                                Text("TITULAR DEL BOLETO", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                                Text("TITULAR DEL BOLETO", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                                 Text(registration.fullName, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = SantotoNavyDark)
-                                Text("${registration.phone} • ${registration.schoolOrOrigin}", fontSize = 10.sp, color = Color.Gray)
+                                Text("${registration.phone} • ${registration.schoolOrOrigin}", fontSize = 11.sp, color = Color.Gray)
                             }
                         }
                     }
@@ -321,7 +325,7 @@ fun EventTicketScreen(
                             .height(16.dp)
                     ) {
                         drawLine(
-                            color = Color(0xFFCBD5E1),
+                            color = SantotoOutlineStrong,
                             start = Offset(24.dp.toPx(), size.height / 2),
                             end = Offset(size.width - 24.dp.toPx(), size.height / 2),
                             strokeWidth = 2.dp.toPx(),
@@ -333,7 +337,7 @@ fun EventTicketScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFFF8FAFC))
+                            .background(SantotoBg)
                             .padding(18.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
@@ -363,13 +367,13 @@ fun EventTicketScreen(
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "Presenta este código digital al ingresar al campus.",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
                         )
                         Text(
                             text = "Emitido: $formattedRegDate",
-                            fontSize = 9.sp,
+                            fontSize = 11.sp,
                             color = Color.LightGray
                         )
                     }
@@ -462,7 +466,7 @@ private fun TicketQrGraphic(
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline),
         modifier = modifier.padding(4.dp)
     ) {
         Canvas(
@@ -498,7 +502,7 @@ private fun TicketQrGraphic(
 
                     if (fill) {
                         drawRect(
-                            color = Color(0xFF0F172A),
+                            color = SantotoTextPrimary,
                             topLeft = Offset(c * cellSize, r * cellSize),
                             size = Size(cellSize * 0.92f, cellSize * 0.92f)
                         )

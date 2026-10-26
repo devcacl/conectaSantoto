@@ -135,7 +135,7 @@ fun SantotoHeader(
                             ) {
                                 Text(
                                     text = if (currentRole == UserRole.PROFESIONAL_ADMISIONES) "ADMIN" else "ASPIRANTE",
-                                    fontSize = 8.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = if (currentRole == UserRole.PROFESIONAL_ADMISIONES) SantotoNavy else Color.White,
                                     modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)

@@ -1,6 +1,12 @@
 package com.example.ui.screens
 
 import android.content.Intent
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoSurfaceVariant
+import com.example.ui.theme.SantotoTextMuted
+import com.example.ui.theme.SantotoTextPrimary
+import com.example.ui.theme.SantotoTextSecondary
+import com.example.ui.theme.SantotoTextBody
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -69,7 +75,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
 import com.example.data.model.ProgramLevel
-import com.example.ui.components.SantotoActionCard
+import com.example.ui.components.SantotoQuickTile
 import com.example.ui.theme.SantotoBg
 import com.example.ui.theme.SantotoGold
 import com.example.ui.theme.SantotoNavy
@@ -158,7 +164,7 @@ fun HomeScreen(
                             )
                             Text(
                                 text = "Vigilada MinEducación • SNIES 1732",
-                                fontSize = 9.5.sp,
+                                fontSize = 11.sp,
                                 color = Color.White.copy(alpha = 0.75f)
                             )
                         }
@@ -244,7 +250,7 @@ fun HomeScreen(
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline)
             ) {
                 Row(
                     modifier = Modifier
@@ -282,7 +288,7 @@ fun HomeScreen(
                             Text(
                                 text = "Portal SAC Oficial de Admisiones",
                                 fontSize = 11.sp,
-                                color = Color(0xFF64748B)
+                                color = SantotoTextSecondary
                             )
                         }
                     }
@@ -360,7 +366,7 @@ fun HomeScreen(
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
@@ -372,7 +378,7 @@ fun HomeScreen(
                         Text(
                             text = "Un asesor oficial de admisiones te orientará de inmediato",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF64748B)
+                            color = SantotoTextSecondary
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -393,14 +399,14 @@ fun HomeScreen(
                             }
                         } else {
                             val formFieldColors = OutlinedTextFieldDefaults.colors(
-                                focusedTextColor = Color(0xFF0F172A),
-                                unfocusedTextColor = Color(0xFF0F172A),
+                                focusedTextColor = SantotoTextPrimary,
+                                unfocusedTextColor = SantotoTextPrimary,
                                 focusedLabelColor = SantotoNavy,
-                                unfocusedLabelColor = Color(0xFF475569),
+                                unfocusedLabelColor = SantotoTextBody,
                                 focusedBorderColor = SantotoNavy,
-                                unfocusedBorderColor = Color(0xFF94A3B8),
+                                unfocusedBorderColor = SantotoTextMuted,
                                 cursorColor = SantotoNavy,
-                                focusedContainerColor = Color(0xFFF8FAFC),
+                                focusedContainerColor = SantotoBg,
                                 unfocusedContainerColor = Color(0xFFFFFFFF)
                             )
 
@@ -498,80 +504,57 @@ fun HomeScreen(
             )
         }
 
-        // 3. Action Cards (Light, Clean, White, with Yellow Badges)
+        // 3. Accesos rápidos en cuadrícula (el asesor IA ya está en el hero)
         item {
-            SantotoActionCard(
-                title = "Tommy Bot • Asesor Virtual",
-                subtitle = "Orientación oficial sobre carreras, costos, homologaciones y becas USTA Tunja",
-                icon = Icons.AutoMirrored.Filled.Chat,
-                badgeText = null,
-                onClick = { viewModel.navigateTo(Screen.Chatbot) }
-            )
-        }
-
-        item {
-            SantotoActionCard(
-                title = "Explora 360°",
-                subtitle = "Recorrido virtual interactivo 360.santototunja.edu.co",
-                icon = Icons.Default.ViewInAr,
-                badgeText = "360°",
-                badgeColor = SantotoYellow,
-                onClick = { viewModel.navigateTo(Screen.Explora360) }
-            )
-        }
-
-        item {
-            SantotoActionCard(
-                title = "Agendar Visita al Campus",
-                subtitle = "Elige día y hora en el calendario y obtén tu pase digital QR",
-                icon = Icons.Default.CalendarMonth,
-                badgeText = "CALENDARIO",
-                badgeColor = SantotoYellow,
-                onClick = { viewModel.navigateTo(Screen.ScheduleVisit) }
-            )
-        }
-
-        item {
-            SantotoActionCard(
-                title = "Test de Orientación Vocacional",
-                subtitle = "Descubre tus áreas de afinidad y carreras recomendadas",
-                icon = Icons.Default.Psychology,
-                onClick = { viewModel.navigateTo(Screen.VocationalTest) }
-            )
-        }
-
-        item {
-            SantotoActionCard(
-                title = "Oferta Académica 2026 - 2027",
-                subtitle = "Pregrados, posgrados y acreditaciones de alta calidad",
-                icon = Icons.Default.School,
-                onClick = { viewModel.navigateTo(Screen.ProgramsCatalog) }
-            )
-        }
-
-        item {
-            SantotoActionCard(
-                title = "Microcredenciales Grado 11°",
-                subtitle = "Adelanta materias universitarias por solo $100.000 homologables",
-                icon = Icons.Default.Engineering,
-                badgeText = "$100.000",
-                badgeColor = SantotoYellow,
-                onClick = {
-                    viewModel.setLevelFilter(ProgramLevel.MICROCREDENCIAL)
-                    viewModel.navigateTo(Screen.ProgramsCatalog)
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SantotoQuickTile(
+                        title = "Agendar Visita al Campus",
+                        icon = Icons.Default.CalendarMonth,
+                        onClick = { viewModel.navigateTo(Screen.ScheduleVisit) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    SantotoQuickTile(
+                        title = "Test de Orientación Vocacional",
+                        icon = Icons.Default.Psychology,
+                        onClick = { viewModel.navigateTo(Screen.VocationalTest) },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
-            )
-        }
-
-        item {
-            SantotoActionCard(
-                title = "Noticias & Actualidad USTA",
-                subtitle = "Convocatorias de becas, convenios, vida universitaria e innovación",
-                icon = Icons.Default.Newspaper,
-                badgeText = "BOLETÍN",
-                badgeColor = SantotoYellow,
-                onClick = { viewModel.navigateTo(Screen.News) }
-            )
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SantotoQuickTile(
+                        title = "Oferta Académica 2026-2027",
+                        icon = Icons.Default.School,
+                        onClick = { viewModel.navigateTo(Screen.ProgramsCatalog) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    SantotoQuickTile(
+                        title = "Explora el Campus 360°",
+                        icon = Icons.Default.ViewInAr,
+                        badgeText = "360°",
+                        onClick = { viewModel.navigateTo(Screen.Explora360) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SantotoQuickTile(
+                        title = "Microcredenciales Grado 11°",
+                        icon = Icons.Default.Engineering,
+                        badgeText = "\$100.000",
+                        onClick = {
+                            viewModel.setLevelFilter(ProgramLevel.MICROCREDENCIAL)
+                            viewModel.navigateTo(Screen.ProgramsCatalog)
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                    SantotoQuickTile(
+                        title = "Noticias y Actualidad USTA",
+                        icon = Icons.Default.Newspaper,
+                        onClick = { viewModel.navigateTo(Screen.News) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
 
         // 4. Próximos Eventos & Open Days
@@ -608,7 +591,7 @@ fun HomeScreen(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                        border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline)
                     ) {
                         Column {
                             // Event Image
@@ -637,7 +620,7 @@ fun HomeScreen(
                                 ) {
                                     Text(
                                         text = event.dateBadge,
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -652,7 +635,7 @@ fun HomeScreen(
                                 ) {
                                     Text(
                                         text = "${event.availableSpots} cupos",
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoGold,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -672,8 +655,8 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.height(3.dp))
                                 Text(
                                     text = event.location,
-                                    fontSize = 10.sp,
-                                    color = Color(0xFF64748B),
+                                    fontSize = 11.sp,
+                                    color = SantotoTextSecondary,
                                     maxLines = 1
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -732,7 +715,7 @@ fun HomeScreen(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+                        border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline)
                     ) {
                         Column {
                             Box(
@@ -755,7 +738,7 @@ fun HomeScreen(
                                 ) {
                                     Text(
                                         text = newsItem.category,
-                                        fontSize = 8.5.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoGold,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -774,7 +757,7 @@ fun HomeScreen(
                                 Spacer(modifier = Modifier.height(3.dp))
                                 Text(
                                     text = newsItem.dateText,
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = Color.Gray
                                 )
                             }
@@ -790,7 +773,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
@@ -820,14 +803,14 @@ fun HomeScreen(
                             Text(
                                 text = "Seccional Tunja • Código SNIES: 1732",
                                 fontSize = 11.sp,
-                                color = Color(0xFF64748B),
+                                color = SantotoTextSecondary,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    androidx.compose.material3.HorizontalDivider(color = Color(0xFFF1F5F9))
+                    androidx.compose.material3.HorizontalDivider(color = SantotoSurfaceVariant)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Contact phone & WhatsApp
@@ -842,7 +825,7 @@ fun HomeScreen(
                         Text(
                             text = "Líneas de Atención: (608) 744 0404 • WhatsApp: 317 510 5383 / 317 514 1479",
                             fontSize = 11.sp,
-                            color = Color(0xFF334155),
+                            color = SantotoTextBody,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -861,7 +844,7 @@ fun HomeScreen(
                         Text(
                             text = "admisiones@ustatunja.edu.co",
                             fontSize = 11.sp,
-                            color = Color(0xFF334155),
+                            color = SantotoTextBody,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -899,7 +882,7 @@ fun HomeScreen(
                         Text(
                             text = "Sedes: Campus Centro (Cra. 19 # 11-64) | Campus Av. Universitaria (Cll. 19 # 22-64), Tunja, Boyacá",
                             fontSize = 11.sp,
-                            color = Color(0xFF64748B),
+                            color = SantotoTextSecondary,
                             lineHeight = 16.sp
                         )
                     }
@@ -908,12 +891,12 @@ fun HomeScreen(
 
                     Surface(
                         shape = RoundedCornerShape(6.dp),
-                        color = Color(0xFFF8FAFC)
+                        color = SantotoBg
                     ) {
                         Text(
                             text = "Institución de Educación Superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional.",
-                            fontSize = 9.sp,
-                            color = Color(0xFF94A3B8),
+                            fontSize = 11.sp,
+                            color = SantotoTextMuted,
                             modifier = Modifier.padding(8.dp),
                             lineHeight = 13.sp
                         )

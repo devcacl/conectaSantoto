@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
 import android.widget.Toast
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoTextPrimary
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoTextBody
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -87,12 +91,12 @@ fun EventRegistrationScreen(
     var isSubmitting by remember { mutableStateOf(false) }
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color(0xFF0F172A),
-        unfocusedTextColor = Color(0xFF0F172A),
+        focusedTextColor = SantotoTextPrimary,
+        unfocusedTextColor = SantotoTextPrimary,
         focusedLabelColor = SantotoNavy,
-        unfocusedLabelColor = Color(0xFF475569),
+        unfocusedLabelColor = SantotoTextBody,
         focusedBorderColor = SantotoNavy,
-        unfocusedBorderColor = Color(0xFFCBD5E1),
+        unfocusedBorderColor = SantotoOutlineStrong,
         cursorColor = SantotoNavy,
         focusedContainerColor = Color.White,
         unfocusedContainerColor = Color.White
@@ -186,7 +190,7 @@ fun EventRegistrationScreen(
                         ) {
                             Text(
                                 text = event.category.uppercase(),
-                                fontSize = 9.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = SantotoNavy,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -233,13 +237,13 @@ fun EventRegistrationScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.AccessTime, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = event.time, fontSize = 12.sp, color = Color(0xFF334155))
+                            Text(text = event.time, fontSize = 12.sp, color = SantotoTextBody)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.LocationOn, contentDescription = null, tint = SantotoNavy, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = event.location, fontSize = 12.sp, color = Color(0xFF334155))
+                            Text(text = event.location, fontSize = 12.sp, color = SantotoTextBody)
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -276,7 +280,7 @@ fun EventRegistrationScreen(
                                     .height(6.dp)
                                     .clip(RoundedCornerShape(3.dp)),
                                 color = if (event.availableSpots <= 10) Color(0xFFE53935) else SantotoGold,
-                                trackColor = Color(0xFFE2E8F0)
+                                trackColor = SantotoOutline
                             )
                         }
                     }

@@ -198,7 +198,7 @@ fun ProgramsCatalogScreen(
                                 ) {
                                     Text(
                                         text = "MICROCREDENCIAL GRADO 11°",
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = SantotoNavyDark,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -237,7 +237,7 @@ fun ProgramsCatalogScreen(
                                     ) {
                                         Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, tint = SantotoGold, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Consultar Requisitos", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                        Text("Consultar Requisitos", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                     }
                                 }
                             }
@@ -279,7 +279,7 @@ fun ProgramsCatalogScreen(
                                 ) {
                                     Text(
                                         text = "Pedir Plan de Estudios",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoGold,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -313,7 +313,7 @@ fun ProgramsCatalogScreen(
                                 ) {
                                     Text(
                                         text = "SNIES: ${program.snies}",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -326,7 +326,7 @@ fun ProgramsCatalogScreen(
                                 ) {
                                     Text(
                                         text = "${program.semestres} • ${program.modalidad}",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF8A6200),
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -359,7 +359,7 @@ fun ProgramsCatalogScreen(
                                 Column {
                                     Text(
                                         text = "Inversión 2026:",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         color = Color.DarkGray
                                     )
                                     Text(
@@ -440,12 +440,12 @@ fun ProgramsCatalogScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("Inversión 2026:", fontSize = 10.sp, color = Color.Gray)
+                                    Text("Inversión 2026:", fontSize = 11.sp, color = Color.Gray)
                                     Text(prog.inversion2026, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = SantotoSuccess)
                                 }
                                 if (prog.inversionNeos2027.isNotBlank()) {
                                     Column(horizontalAlignment = Alignment.End) {
-                                        Text("Neos 2027:", fontSize = 10.sp, color = Color.Gray)
+                                        Text("Neos 2027:", fontSize = 11.sp, color = Color.Gray)
                                         Text(prog.inversionNeos2027, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = SantotoNavy)
                                     }
                                 }

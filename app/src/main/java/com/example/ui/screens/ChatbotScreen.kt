@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
 import android.content.Intent
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoTextMuted
+import com.example.ui.theme.SantotoTextPrimary
+import com.example.ui.theme.SantotoTextSecondary
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -133,7 +137,7 @@ fun ChatbotScreen(
                     )
                     Text(
                         text = "Exclusivo USTA Tunja • Respuestas con lógica y memoria",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         color = SantotoYellow
                     )
                 }
@@ -236,7 +240,7 @@ fun ChatbotScreen(
             color = Color.White,
             shape = RoundedCornerShape(26.dp),
             shadowElevation = 3.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0))
+            border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline)
         ) {
             Row(
                 modifier = Modifier
@@ -252,15 +256,15 @@ fun ChatbotScreen(
                             text = "Escribe tu pregunta...",
                             fontSize = 14.sp,
                             maxLines = 1,
-                            color = Color(0xFF94A3B8)
+                            color = SantotoTextMuted
                         )
                     },
                     modifier = Modifier
                         .weight(1f)
                         .testTag("chat_input_text"),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF0F172A),
-                        unfocusedTextColor = Color(0xFF0F172A),
+                        focusedTextColor = SantotoTextPrimary,
+                        unfocusedTextColor = SantotoTextPrimary,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         cursorColor = SantotoNavy,
@@ -281,13 +285,13 @@ fun ChatbotScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(if (inputText.isNotBlank()) SantotoNavy else Color(0xFFE2E8F0))
+                        .background(if (inputText.isNotBlank()) SantotoNavy else SantotoOutline)
                         .testTag("chat_send_button")
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Enviar mensaje",
-                        tint = if (inputText.isNotBlank()) SantotoYellow else Color(0xFF94A3B8),
+                        tint = if (inputText.isNotBlank()) SantotoYellow else SantotoTextMuted,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -347,7 +351,7 @@ private fun MessageBubble(
                 ),
                 color = if (isUser) SantotoNavy else Color.White,
                 shadowElevation = 1.dp,
-                border = if (!isUser) androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)) else null
+                border = if (!isUser) androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline) else null
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     if (!isUser) {
@@ -368,7 +372,7 @@ private fun MessageBubble(
                             ) {
                                 Text(
                                     text = "Asesor USTA",
-                                    fontSize = 9.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SantotoNavy,
                                     modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -426,8 +430,8 @@ private fun MessageBubble(
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = "Fuente: " + message.sources.joinToString(", "),
-                                fontSize = 10.sp,
-                                color = Color(0xFF64748B),
+                                fontSize = 11.sp,
+                                color = SantotoTextSecondary,
                                 lineHeight = 13.sp
                             )
                         }
@@ -471,7 +475,7 @@ private fun MarkdownMessageText(
     rawText: String,
     isUser: Boolean
 ) {
-    val textColor = if (isUser) Color.White else Color(0xFF0F172A)
+    val textColor = if (isUser) Color.White else SantotoTextPrimary
     val annotatedString = remember(rawText, textColor) {
         parseMarkdownToAnnotatedString(rawText, textColor)
     }

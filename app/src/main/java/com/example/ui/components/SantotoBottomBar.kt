@@ -216,7 +216,7 @@ private fun FloatingDockItem(
 
         Text(
             text = label,
-            fontSize = 9.5.sp,
+            fontSize = 11.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             color = if (isSelected) SantotoYellow else Color.White.copy(alpha = 0.7f),
             maxLines = 1,

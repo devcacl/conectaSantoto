@@ -315,7 +315,7 @@ fun VocationalTestScreen(
                             ) {
                                 Text(
                                     text = "Consultar",
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SantotoNavyDark,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

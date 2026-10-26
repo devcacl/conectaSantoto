@@ -1,6 +1,8 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.background
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoTextSecondary
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -161,7 +163,7 @@ fun InteractiveCalendarView(
                         text = dayName,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF64748B),
+                        color = SantotoTextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(36.dp)
                     )
@@ -214,7 +216,7 @@ fun InteractiveCalendarView(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = when {
                                             isSelected -> SantotoYellow
-                                            isPast -> Color(0xFFCBD5E1)
+                                            isPast -> SantotoOutlineStrong
                                             else -> SantotoNavy
                                         }
                                     )
