@@ -41,6 +41,18 @@ interface SantotoDao {
     @Query("SELECT COUNT(*) FROM leads")
     fun getLeadCount(): Flow<Int>
 
+    @Query("SELECT * FROM leads WHERE id = :id")
+    suspend fun getLeadById(id: Long): Lead?
+
+    @Query("SELECT * FROM leads WHERE remoteId = :remoteId")
+    suspend fun getLeadByRemoteId(remoteId: String): Lead?
+
+    @Query("SELECT remoteId FROM leads WHERE remoteId IS NOT NULL")
+    suspend fun getLeadRemoteIds(): List<String>
+
+    @Query("DELETE FROM leads WHERE remoteId = :remoteId")
+    suspend fun deleteLeadByRemoteId(remoteId: String)
+
     // --- CAMPUS VISITS ---
     @Query("SELECT * FROM campus_visits ORDER BY dateText ASC, timeSlot ASC")
     fun getAllVisits(): Flow<List<CampusVisit>>
@@ -62,6 +74,18 @@ interface SantotoDao {
 
     @Query("SELECT COUNT(*) FROM campus_visits")
     fun getVisitCount(): Flow<Int>
+
+    @Query("SELECT * FROM campus_visits WHERE id = :id")
+    suspend fun getVisitById(id: Long): CampusVisit?
+
+    @Query("SELECT * FROM campus_visits WHERE remoteId = :remoteId")
+    suspend fun getVisitByRemoteId(remoteId: String): CampusVisit?
+
+    @Query("SELECT remoteId FROM campus_visits WHERE remoteId IS NOT NULL")
+    suspend fun getVisitRemoteIds(): List<String>
+
+    @Query("DELETE FROM campus_visits WHERE remoteId = :remoteId")
+    suspend fun deleteVisitByRemoteId(remoteId: String)
 
     // --- CAMPUS EVENTS ---
     @Query("SELECT * FROM events ORDER BY dateText ASC")
@@ -147,4 +171,16 @@ interface SantotoDao {
 
     @Query("SELECT COUNT(*) FROM event_registrations WHERE eventId = :eventId")
     fun getRegistrationCountForEvent(eventId: Long): Flow<Int>
+
+    @Query("SELECT * FROM event_registrations WHERE id = :id")
+    suspend fun getRegistrationById(id: Long): EventRegistration?
+
+    @Query("SELECT * FROM event_registrations WHERE remoteId = :remoteId")
+    suspend fun getRegistrationByRemoteId(remoteId: String): EventRegistration?
+
+    @Query("SELECT remoteId FROM event_registrations WHERE remoteId IS NOT NULL")
+    suspend fun getRegistrationRemoteIds(): List<String>
+
+    @Query("DELETE FROM event_registrations WHERE remoteId = :remoteId")
+    suspend fun deleteRegistrationByRemoteId(remoteId: String)
 }

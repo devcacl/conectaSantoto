@@ -22,10 +22,12 @@ Nota: el repo NO incluía `gradlew`/`gradle-wrapper`; si falta, generarlo con `g
 - `MainActivity.kt` — Scaffold, header, bottom bar y `when (screen)` de navegación propia (sealed `Screen`, estado en el ViewModel; **no usa navigation-compose**)
 - `viewmodel/SantotoViewModel.kt` — ViewModel único con `StateFlow`
 - `data/model/` — entidades Room (Lead, CampusVisit, CampusEvent, CampusNews, EventRegistration, RagDocument…)
-- `data/local/` — `SantotoDatabase` (versión 4, `fallbackToDestructiveMigration`, `exportSchema=false`) y `SantotoDao`
+- `data/local/` — `SantotoDatabase` (versión 5, `fallbackToDestructiveMigration`, `exportSchema=false`) y `SantotoDao`
 - `data/repository/SantotoRepository.kt` — repositorio + seed de datos
 - `data/rag/` — motor RAG y base de conocimiento por defecto; `data/remote/` — `GeminiClient`, `CohereClient`
-- `ui/screens/`, `ui/components/`, `ui/theme/` — Compose. Paleta: Azul `#002B49`, Oro `#D1A153`, Amarillo `#FFD100`, Fondo `#F8FAFC`
+- `data/remote/AdmissionsBackend.kt` — puente con Firestore. Aspirantes: envía leads, visitas e inscripciones con sesión anónima y bandeja de salida persistente con reintento (solo **crean** documentos). Admisiones: login con Firebase Auth (correo/contraseña + documento `admins/{uid}`), escucha en tiempo real y escribe de vuelta estados/asistencia/borrados. Room es la fuente local; las entidades sincronizadas tienen `remoteId` (null = dato de ejemplo local, nunca se sube ni se borra)
+- `firestore.rules` / `firebase.json` / `.firebaserc` — reglas y config de Firebase (proyecto `santoto-admisiones-tunja`). Desplegar con `firebase deploy --only firestore` o el MCP de Firebase
+- `ui/screens/`, `ui/components/`, `ui/theme/` — Compose. Paleta real (`Color.kt`): Azul `#003865`, Amarillo `#FFC72C`, Fondo `#F8FAFC`. Usar tokens (`SantotoOutline`, `SantotoTextBody`, `SantotoTextSecondary`…) y estilos de `MaterialTheme.typography`; no colores `Color(0xFF…)` ni `fontSize` < 11sp sueltos
 
 ## Convenciones
 - Compose + M3; reutilizar `SantotoCard`, `SantotoHeader`, `SantotoBottomBar` y colores de `ui/theme/Color.kt` antes de crear nuevos
@@ -36,7 +38,9 @@ Nota: el repo NO incluía `gradlew`/`gradle-wrapper`; si falta, generarlo con `g
 ## Secretos y seguridad (IMPORTANTE)
 - `GEMINI_API_KEY` se lee de `.env` (copiar `.env.example` → `.env`, ignorado por git) vía secrets-gradle-plugin → `BuildConfig.GEMINI_API_KEY`
 - Firma: `debug.keystore` (ignorado por git, **hay que generarlo**, ver abajo) y release vía env vars `KEYSTORE_PATH`, `STORE_PASSWORD`, `KEY_PASSWORD`
-- **Hallazgo:** `data/remote/CohereClient.kt` contiene una API key de Cohere hardcodeada y está en el historial de git. Rotarla y moverla a `.env`/BuildConfig. No escribir nuevas claves en código.
+- `COHERE_API_KEY` también viene de `.env` → `BuildConfig`. La clave de Cohere antigua sigue en el historial de git: **debe rotarse** en el panel de Cohere. No escribir nuevas claves en código.
+- `app/google-services.json` (config pública del cliente Firebase) se versiona; la seguridad real está en `firestore.rules`. Los administradores se autorizan con un documento `admins/{uid}` creado a mano en la consola de Firebase
+- El `ADMIN_PIN` ya no se usa (excluido de BuildConfig con `ignoreList`); si queda en tu `.env` local, bórralo
 - Nunca commitear `.env`, `*.jks`, `*.keystore`, `local.properties`
 
 ## Generar debug.keystore (una vez)

@@ -22,6 +22,7 @@ import com.example.data.rag.CampusTourData
 import com.example.data.rag.SantotoKnowledgeBase
 import com.example.data.rag.SantotoRagEngine
 import com.example.data.rag.VocationalTestData
+import com.example.data.remote.AdmissionsBackend
 import com.example.data.repository.SantotoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,15 +55,28 @@ sealed class Screen {
 
 class SantotoViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val backend = AdmissionsBackend(application)
     private val repository: SantotoRepository
+    private var stopAdminSync: (() -> Unit)? = null
 
     init {
         val database = SantotoDatabase.getDatabase(application)
-        repository = SantotoRepository(database.santotoDao())
+        repository = SantotoRepository(database.santotoDao(), backend)
         viewModelScope.launch {
             repository.seedInitialDataIfEmpty()
         }
+        backend.resetToAspirante()
+        repository.syncPending()
     }
+
+    override fun onCleared() {
+        stopAdminSync?.invoke()
+        super.onCleared()
+    }
+
+    /** Acceso de Admisiones con Firebase Auth; solo autoriza si existe admins/{uid}. */
+    fun adminSignIn(email: String, password: String, onResult: (Result<Unit>) -> Unit) =
+        backend.adminSignIn(email, password, onResult)
 
     // Role and Navigation
     private val _currentRole = MutableStateFlow(UserRole.ASPIRANTE)
@@ -75,9 +89,13 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
 
     fun setRole(role: UserRole) {
         _currentRole.value = role
+        stopAdminSync?.invoke()
+        stopAdminSync = null
         if (role == UserRole.PROFESIONAL_ADMISIONES) {
+            stopAdminSync = repository.startAdminSync()
             navigateTo(Screen.AdmissionsPanel)
         } else {
+            backend.adminSignOut()
             navigateTo(Screen.Home)
         }
     }

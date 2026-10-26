@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Personal de Admisiones: documento admins/{uid} creado a mano desde la consola.
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function str(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    function validLead(d) {
+      return d.keys().hasOnly(['fullName', 'phone', 'email', 'cityOrSchool', 'programInterest', 'degreeLevel', 'status', 'notes', 'source', 'createdAt'])
+        && d.keys().hasAll(['fullName', 'phone', 'programInterest', 'status', 'createdAt'])
+        && str(d.fullName, 120) && d.fullName.size() >= 3
+        && str(d.phone, 20) && d.phone.size() >= 7
+        && (!('email' in d) || str(d.email, 160))
+        && (!('cityOrSchool' in d) || str(d.cityOrSchool, 160))
+        && str(d.programInterest, 160)
+        && (!('degreeLevel' in d) || str(d.degreeLevel, 40))
+        && d.status in ['NUEVO', 'CONTACTADO', 'VISITA_AGENDADA']
+        && (!('notes' in d) || str(d.notes, 1000))
+        && (!('source' in d) || str(d.source, 40))
+        && d.createdAt is int;
+    }
+
+    function validVisit(d) {
+      return d.keys().hasOnly(['studentName', 'phone', 'email', 'campus', 'dateText', 'timeSlot', 'programInterest', 'visitorCount', 'school', 'status', 'createdAt'])
+        && d.keys().hasAll(['studentName', 'phone', 'campus', 'dateText', 'timeSlot', 'createdAt'])
+        && str(d.studentName, 120) && d.studentName.size() >= 3
+        && str(d.phone, 20)
+        && str(d.campus, 120) && str(d.dateText, 80) && str(d.timeSlot, 60)
+        && (!('visitorCount' in d) || (d.visitorCount is int && d.visitorCount >= 1 && d.visitorCount <= 20))
+        && d.createdAt is int;
+    }
+
+    function validRegistration(d) {
+      return d.keys().hasOnly(['eventId', 'eventTitle', 'fullName', 'phone', 'email', 'schoolOrOrigin', 'ticketCode', 'attended', 'createdAt'])
+        && d.keys().hasAll(['eventId', 'eventTitle', 'fullName', 'phone', 'ticketCode', 'createdAt'])
+        && str(d.fullName, 120) && d.fullName.size() >= 3
+        && str(d.phone, 20)
+        && str(d.ticketCode, 30)
+        && (!('attended' in d) || d.attended == false)
+        && d.createdAt is int;
+    }
+
+    // Aspirantes (sesión anónima): solo crean. Nunca leen ni modifican datos de otros.
+    match /leads/{id} {
+      allow create: if signedIn() && validLead(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /visits/{id} {
+      allow create: if signedIn() && validVisit(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /event_registrations/{id} {
+      allow create: if signedIn() && validRegistration(request.resource.data);
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Solo se administra desde la consola de Firebase.
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

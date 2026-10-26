@@ -10,5 +10,5 @@ Archivos: `data/rag/SantotoKnowledgeBase.kt` (contenido por defecto), `data/rag/
 Reglas:
 - La información institucional (costos, requisitos, becas, fechas) debe venir del usuario o de documentos oficiales; no inventar datos. Si falta, preguntar.
 - Documentos en Markdown, en español, con títulos claros para mejorar la recuperación.
-- Claves de API: jamás en código. `GEMINI_API_KEY` va en `.env` (BuildConfig). La clave de Cohere hoy está hardcodeada en `CohereClient.kt`: al tocar ese archivo, migrarla a `.env`/BuildConfig y recomendar rotarla.
+- Claves de API: jamás en código. `GEMINI_API_KEY` va en `.env` (BuildConfig). `COHERE_API_KEY` también va en `.env` (BuildConfig). La clave antigua sigue en el historial de git: recomendar rotarla.
 - Tras cambios, compilar y probar el flujo del chatbot en emulador si hay uno disponible.

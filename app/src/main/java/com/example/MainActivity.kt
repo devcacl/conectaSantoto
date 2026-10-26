@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.remote.adminSignInErrorMessage
 import com.example.ui.components.SantotoBottomBar
 import com.example.ui.components.SantotoHeader
 import com.example.ui.screens.AdmissionsDashboardScreen
@@ -59,48 +60,66 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private const val PIN_PLACEHOLDER = "MY_ADMIN_PIN"
-
-/** Acceso provisional al panel administrativo; reemplazar por Firebase Auth antes de produccion. */
+/** Acceso de Admisiones con Firebase Auth (correo y contraseña). */
 @Composable
-private fun AdminPinDialog(onDismiss: () -> Unit, onAuthorized: () -> Unit) {
-    var pin by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf(false) }
-    val configured = BuildConfig.ADMIN_PIN.isNotBlank() && BuildConfig.ADMIN_PIN != PIN_PLACEHOLDER
+private fun AdminLoginDialog(
+    onDismiss: () -> Unit,
+    onSignIn: (String, String, (Result<Unit>) -> Unit) -> Unit,
+    onAuthorized: () -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (!loading) onDismiss() },
         title = { Text("Acceso Administrativo", fontWeight = FontWeight.Bold) },
         text = {
             Column {
                 Text(
-                    if (configured) "Ingresa el PIN del equipo de Admisiones."
-                    else "El acceso administrativo no está configurado. Define ADMIN_PIN en el archivo .env.",
+                    "Ingresa con tu cuenta del equipo de Admisiones.",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                if (configured) {
-                    OutlinedTextField(
-                        value = pin,
-                        onValueChange = { pin = it; error = false },
-                        label = { Text("PIN") },
-                        singleLine = true,
-                        isError = error,
-                        supportingText = { if (error) Text("PIN incorrecto") },
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
-                    )
-                }
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it; error = null },
+                    label = { Text("Correo") },
+                    singleLine = true,
+                    enabled = !loading,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it; error = null },
+                    label = { Text("Contraseña") },
+                    singleLine = true,
+                    enabled = !loading,
+                    isError = error != null,
+                    supportingText = { error?.let { Text(it) } },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                )
             }
         },
         confirmButton = {
-            if (configured) {
-                TextButton(onClick = { if (pin == BuildConfig.ADMIN_PIN) onAuthorized() else error = true }) {
-                    Text("Ingresar")
+            TextButton(
+                enabled = !loading && email.isNotBlank() && password.isNotEmpty(),
+                onClick = {
+                    loading = true
+                    error = null
+                    onSignIn(email, password) { result ->
+                        loading = false
+                        result
+                            .onSuccess { onAuthorized() }
+                            .onFailure { error = adminSignInErrorMessage(it) }
+                    }
                 }
-            }
+            ) { Text(if (loading) "Ingresando…" else "Ingresar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(enabled = !loading, onClick = onDismiss) { Text("Cancelar") } }
     )
 }
 
@@ -112,12 +131,13 @@ fun SantotoApp(
     val currentScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
     val isVrModeEnabled by viewModel.isVrModeEnabled.collectAsStateWithLifecycle()
 
-    var showAdminPinDialog by remember { mutableStateOf(false) }
-    if (showAdminPinDialog) {
-        AdminPinDialog(
-            onDismiss = { showAdminPinDialog = false },
+    var showAdminLoginDialog by remember { mutableStateOf(false) }
+    if (showAdminLoginDialog) {
+        AdminLoginDialog(
+            onDismiss = { showAdminLoginDialog = false },
+            onSignIn = viewModel::adminSignIn,
             onAuthorized = {
-                showAdminPinDialog = false
+                showAdminLoginDialog = false
                 viewModel.setRole(UserRole.PROFESIONAL_ADMISIONES)
             }
         )
@@ -159,7 +179,7 @@ fun SantotoApp(
                     currentRole = currentRole,
                     onToggleRole = {
                         if (currentRole == UserRole.ASPIRANTE) {
-                            showAdminPinDialog = true
+                            showAdminLoginDialog = true
                         } else {
                             viewModel.setRole(UserRole.ASPIRANTE)
                         }

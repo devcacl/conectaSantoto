@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 enum class VisitStatus(val label: String) {
@@ -10,7 +11,7 @@ enum class VisitStatus(val label: String) {
     CANCELADA("Cancelada")
 }
 
-@Entity(tableName = "campus_visits")
+@Entity(tableName = "campus_visits", indices = [Index(value = ["remoteId"], unique = true)])
 data class CampusVisit(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -25,5 +26,7 @@ data class CampusVisit(
     val school: String = "",
     val status: VisitStatus = VisitStatus.AGENDADA,
     val confirmedByStaff: Boolean = false,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    /** ID del documento en Firestore; null si la visita es solo local. */
+    val remoteId: String? = null
 )

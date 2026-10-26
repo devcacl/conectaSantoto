@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "881650226150",
+    "project_id": "santoto-admisiones-tunja",
+    "storage_bucket": "santoto-admisiones-tunja.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:881650226150:android:229d63e461942791a2bc27",
+        "android_client_info": {
+          "package_name": "com.aistudio.santototunja.admxpz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwBXEcmfNH1vM7j5Ei8r-IRE5VsNRim9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

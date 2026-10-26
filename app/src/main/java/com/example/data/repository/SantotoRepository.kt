@@ -10,10 +10,23 @@ import com.example.util.DateUtils
 import com.example.data.model.LeadStatus
 import com.example.data.model.RagDocument
 import com.example.data.model.VisitStatus
+import com.example.data.remote.AdmissionsBackend
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.UUID
 
-class SantotoRepository(private val dao: SantotoDao) {
+private const val RECENT_WINDOW_MS = 2 * 60 * 1000L
+
+class SantotoRepository(
+    private val dao: SantotoDao,
+    private val backend: AdmissionsBackend? = null
+) {
 
     val allLeads: Flow<List<Lead>> = dao.getAllLeads()
     val allVisits: Flow<List<CampusVisit>> = dao.getAllVisits()
@@ -28,15 +41,115 @@ class SantotoRepository(private val dao: SantotoDao) {
     val newsCount: Flow<Int> = dao.getNewsCount()
     val ragDocumentCount: Flow<Int> = dao.getRagDocumentCount()
 
-    suspend fun insertLead(lead: Lead): Long = dao.insertLead(lead)
-    suspend fun updateLead(lead: Lead) = dao.updateLead(lead)
-    suspend fun updateLeadStatus(id: Long, status: LeadStatus) = dao.updateLeadStatus(id, status)
-    suspend fun deleteLead(lead: Lead) = dao.deleteLead(lead)
+    // --- Sincronización con Firestore ---
+    private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val syncMutex = Mutex()
 
-    suspend fun insertVisit(visit: CampusVisit): Long = dao.insertVisit(visit)
-    suspend fun updateVisit(visit: CampusVisit) = dao.updateVisit(visit)
-    suspend fun updateVisitStatus(id: Long, status: VisitStatus) = dao.updateVisitStatus(id, status)
-    suspend fun deleteVisit(visit: CampusVisit) = dao.deleteVisit(visit)
+    fun syncPending() {
+        backend?.flush()
+    }
+
+    /** Admisiones: refleja Firestore en Room en tiempo real. Devuelve la función para detenerlo. */
+    fun startAdminSync(): () -> Unit = backend?.listenAdmin(
+        onLeads = { remote -> syncScope.launch { syncMutex.withLock { applyRemoteLeads(remote) } } },
+        onVisits = { remote -> syncScope.launch { syncMutex.withLock { applyRemoteVisits(remote) } } },
+        onRegistrations = { remote -> syncScope.launch { syncMutex.withLock { applyRemoteRegistrations(remote) } } }
+    ) ?: {}
+
+    /** Los registros recién creados localmente pueden no estar aún en el snapshot: no se borran. */
+    private fun isStale(createdAt: Long) = createdAt < System.currentTimeMillis() - RECENT_WINDOW_MS
+
+    internal suspend fun applyRemoteLeads(remote: List<Lead>) {
+        remote.forEach { r -> dao.insertLead(r.copy(id = dao.getLeadByRemoteId(r.remoteId!!)?.id ?: 0)) }
+        val keep = remote.mapNotNull { it.remoteId }.toSet()
+        dao.getLeadRemoteIds().filter { it !in keep }.forEach { id ->
+            if (dao.getLeadByRemoteId(id)?.createdAt?.let(::isStale) == true) dao.deleteLeadByRemoteId(id)
+        }
+    }
+
+    internal suspend fun applyRemoteVisits(remote: List<CampusVisit>) {
+        remote.forEach { r -> dao.insertVisit(r.copy(id = dao.getVisitByRemoteId(r.remoteId!!)?.id ?: 0)) }
+        val keep = remote.mapNotNull { it.remoteId }.toSet()
+        dao.getVisitRemoteIds().filter { it !in keep }.forEach { id ->
+            if (dao.getVisitByRemoteId(id)?.createdAt?.let(::isStale) == true) dao.deleteVisitByRemoteId(id)
+        }
+    }
+
+    internal suspend fun applyRemoteRegistrations(remote: List<EventRegistration>) {
+        remote.forEach { r -> dao.insertRegistration(r.copy(id = dao.getRegistrationByRemoteId(r.remoteId!!)?.id ?: 0)) }
+        val keep = remote.mapNotNull { it.remoteId }.toSet()
+        dao.getRegistrationRemoteIds().filter { it !in keep }.forEach { id ->
+            if (dao.getRegistrationByRemoteId(id)?.registeredAt?.let(::isStale) == true) dao.deleteRegistrationByRemoteId(id)
+        }
+    }
+
+    // --- Leads ---
+    suspend fun insertLead(lead: Lead): Long {
+        val synced = lead.copy(remoteId = lead.remoteId ?: UUID.randomUUID().toString())
+        return dao.insertLead(synced).also { backend?.pushLead(synced) }
+    }
+
+    suspend fun updateLead(lead: Lead) {
+        dao.updateLead(lead)
+        backend?.updateRemote(
+            "leads", lead.remoteId,
+            mapOf(
+                "fullName" to lead.fullName.take(120),
+                "phone" to lead.phone.take(20),
+                "email" to lead.email.take(160),
+                "cityOrSchool" to lead.cityOrSchool.take(160),
+                "programInterest" to lead.programInterest.take(160),
+                "degreeLevel" to lead.degreeLevel.take(40),
+                "status" to lead.status.name,
+                "notes" to lead.notes.take(1000)
+            )
+        )
+    }
+
+    suspend fun updateLeadStatus(id: Long, status: LeadStatus) {
+        dao.updateLeadStatus(id, status)
+        backend?.updateRemote("leads", dao.getLeadById(id)?.remoteId, mapOf("status" to status.name))
+    }
+
+    suspend fun deleteLead(lead: Lead) {
+        dao.deleteLead(lead)
+        backend?.deleteRemote("leads", lead.remoteId)
+    }
+
+    // --- Visitas ---
+    suspend fun insertVisit(visit: CampusVisit): Long {
+        val synced = visit.copy(remoteId = visit.remoteId ?: UUID.randomUUID().toString())
+        return dao.insertVisit(synced).also { backend?.pushVisit(synced) }
+    }
+
+    suspend fun updateVisit(visit: CampusVisit) {
+        dao.updateVisit(visit)
+        backend?.updateRemote(
+            "visits", visit.remoteId,
+            mapOf(
+                "studentName" to visit.studentName.take(120),
+                "phone" to visit.phone.take(20),
+                "email" to visit.email.take(160),
+                "campus" to visit.campus.take(120),
+                "dateText" to visit.dateText.take(80),
+                "timeSlot" to visit.timeSlot.take(60),
+                "programInterest" to visit.programInterest.take(160),
+                "visitorCount" to visit.visitorCount.coerceIn(1, 20),
+                "school" to visit.school.take(160),
+                "status" to visit.status.name
+            )
+        )
+    }
+
+    suspend fun updateVisitStatus(id: Long, status: VisitStatus) {
+        dao.updateVisitStatus(id, status)
+        backend?.updateRemote("visits", dao.getVisitById(id)?.remoteId, mapOf("status" to status.name))
+    }
+
+    suspend fun deleteVisit(visit: CampusVisit) {
+        dao.deleteVisit(visit)
+        backend?.deleteRemote("visits", visit.remoteId)
+    }
 
     suspend fun insertEvent(event: CampusEvent): Long = dao.insertEvent(event)
     suspend fun updateEvent(event: CampusEvent) = dao.updateEvent(event)
@@ -51,8 +164,18 @@ class SantotoRepository(private val dao: SantotoDao) {
     fun getRegistrationsForEvent(eventId: Long): Flow<List<EventRegistration>> = dao.getRegistrationsForEvent(eventId)
     suspend fun insertRegistration(registration: EventRegistration): Long = dao.insertRegistration(registration)
     suspend fun updateRegistration(registration: EventRegistration) = dao.updateRegistration(registration)
-    suspend fun deleteRegistration(registration: EventRegistration) = dao.deleteRegistration(registration)
-    suspend fun updateAttendance(registrationId: Long, attended: Boolean) = dao.updateAttendance(registrationId, attended)
+
+    suspend fun deleteRegistration(registration: EventRegistration) {
+        dao.deleteRegistration(registration)
+        backend?.deleteRemote("event_registrations", registration.remoteId)
+    }
+
+    suspend fun updateAttendance(registrationId: Long, attended: Boolean) {
+        dao.updateAttendance(registrationId, attended)
+        backend?.updateRemote(
+            "event_registrations", dao.getRegistrationById(registrationId)?.remoteId, mapOf("attended" to attended)
+        )
+    }
 
     suspend fun registerForEvent(
         event: CampusEvent,
@@ -72,9 +195,11 @@ class SantotoRepository(private val dao: SantotoDao) {
             email = email.trim(),
             schoolOrOrigin = school.trim(),
             attended = false,
-            ticketCode = ticketCode
+            ticketCode = ticketCode,
+            remoteId = UUID.randomUUID().toString()
         )
         val id = dao.insertRegistration(reg)
+        backend?.pushRegistration(reg)
 
         // Decrement available spots in real time
         val newSpots = (event.availableSpots - 1).coerceAtLeast(0)
@@ -88,9 +213,11 @@ class SantotoRepository(private val dao: SantotoDao) {
             cityOrSchool = school.ifBlank { "Aspirante a Evento" },
             programInterest = event.category,
             status = LeadStatus.CONTACTADO,
-            notes = "Inscrito al evento: ${event.title} (${event.dateBadge} - $ticketCode)"
+            notes = "Inscrito al evento: ${event.title} (${event.dateBadge} - $ticketCode)",
+            remoteId = UUID.randomUUID().toString()
         )
         dao.insertLead(lead)
+        backend?.pushLead(lead, source = "evento")
 
         return reg.copy(id = id)
     }
