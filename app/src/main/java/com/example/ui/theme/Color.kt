@@ -36,6 +36,9 @@ val SantotoTextMuted = Color(0xFF94A3B8)      // Solo decorativo/deshabilitado, 
 val SantotoOutline = Color(0xFFE2E8F0)
 val SantotoOutlineStrong = Color(0xFFCBD5E1)
 
+// Marca de terceros
+val SantotoWhatsApp = Color(0xFF25D366)
+
 // Estado
 val SantotoSuccess = Color(0xFF16A34A)
 val SantotoWarning = Color(0xFFFFC72C)
