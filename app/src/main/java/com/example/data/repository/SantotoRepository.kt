@@ -184,8 +184,9 @@ class SantotoRepository(
         email: String,
         school: String
     ): EventRegistration {
-        val randomSuffix = (1000..9999).random()
-        val ticketCode = "USTA-EVT-$randomSuffix"
+        // El código sale del UUID del registro: 8 hex = 4.300 millones de combinaciones, sin repetidos prácticos
+        val remoteId = UUID.randomUUID().toString()
+        val ticketCode = "USTA-EVT-" + remoteId.take(8).uppercase()
 
         val reg = EventRegistration(
             eventId = event.id,
@@ -196,7 +197,7 @@ class SantotoRepository(
             schoolOrOrigin = school.trim(),
             attended = false,
             ticketCode = ticketCode,
-            remoteId = UUID.randomUUID().toString()
+            remoteId = remoteId
         )
         val id = dao.insertRegistration(reg)
         backend?.pushRegistration(reg)

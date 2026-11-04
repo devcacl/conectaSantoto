@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import com.example.util.Validation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.ui.theme.SantotoTextBody
 import com.example.ui.theme.SantotoTextMuted
 import com.example.ui.theme.SantotoTextPrimary
@@ -74,6 +77,7 @@ fun ScheduleVisitScreen(
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var school by remember { mutableStateOf("") }
+    var showErrors by remember { mutableStateOf(false) }
     var selectedCampus by remember { mutableStateOf("Campus Av. Universitaria") }
     val todayText = remember { DateUtils.dayText(0) }
     val availableDays = remember { DateUtils.upcomingBusinessDays(8) }
@@ -300,7 +304,7 @@ fun ScheduleVisitScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         OutlinedTextField(
                             value = studentName,
-                            onValueChange = { studentName = it },
+                            onValueChange = { studentName = it.take(120) }, isError = showErrors && !Validation.isValidName(studentName), supportingText = { if (showErrors && !Validation.isValidName(studentName)) Text(Validation.NAME_ERROR) },
                             label = { Text("Nombre y apellidos *", fontWeight = FontWeight.Medium) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth().testTag("visit_name_input"),
@@ -309,7 +313,7 @@ fun ScheduleVisitScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = phone,
-                            onValueChange = { phone = it },
+                            onValueChange = { phone = it.take(20) }, isError = showErrors && !Validation.isValidPhone(phone), supportingText = { if (showErrors && !Validation.isValidPhone(phone)) Text(Validation.PHONE_ERROR) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             label = { Text("Celular / WhatsApp *", fontWeight = FontWeight.Medium) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth().testTag("visit_phone_input"),
@@ -318,7 +322,7 @@ fun ScheduleVisitScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { email = it },
+                            onValueChange = { email = it.take(160) }, isError = showErrors && !Validation.isValidOptionalEmail(email), supportingText = { if (showErrors && !Validation.isValidOptionalEmail(email)) Text(Validation.EMAIL_ERROR) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                             label = { Text("Correo electrónico", fontWeight = FontWeight.Medium) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -379,7 +383,8 @@ fun ScheduleVisitScreen(
             item {
                 Button(
                     onClick = {
-                        if (studentName.isNotBlank() && phone.isNotBlank()) {
+                        showErrors = true
+                        if (Validation.isValidName(studentName) && Validation.isValidPhone(phone) && Validation.isValidOptionalEmail(email)) {
                             viewModel.scheduleCampusVisit(
                                 studentName = studentName,
                                 phone = phone,

@@ -108,6 +108,15 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun navigateBack(): Boolean {
+        if (_currentScreen.value is Screen.EventTicket) {
+            // Después de inscribirse no se regresa al formulario (evita inscribirse dos veces)
+            while (screenBackStack.isNotEmpty() && screenBackStack.last() !is Screen.Events) {
+                screenBackStack.removeAt(screenBackStack.lastIndex)
+            }
+            _currentScreen.value =
+                if (screenBackStack.isNotEmpty()) screenBackStack.removeAt(screenBackStack.lastIndex) else Screen.Events
+            return true
+        }
         if (screenBackStack.isNotEmpty()) {
             _currentScreen.value = screenBackStack.removeAt(screenBackStack.lastIndex)
             return true

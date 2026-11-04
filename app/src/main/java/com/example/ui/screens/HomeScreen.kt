@@ -1,6 +1,9 @@
 package com.example.ui.screens
 
 import android.content.Intent
+import com.example.util.Validation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.ui.theme.SantotoOutline
 import com.example.ui.theme.SantotoSurfaceVariant
 import com.example.ui.theme.SantotoTextMuted
@@ -105,6 +108,7 @@ fun HomeScreen(
     var leadSchool by remember { mutableStateOf("") }
     var leadProgram by remember { mutableStateOf("Ingeniería de Sistemas") }
     var leadSuccessMsg by remember { mutableStateOf(false) }
+    var showLeadErrors by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier
@@ -412,7 +416,7 @@ fun HomeScreen(
 
                             OutlinedTextField(
                                 value = leadName,
-                                onValueChange = { leadName = it },
+                                onValueChange = { leadName = it.take(120) }, isError = showLeadErrors && !Validation.isValidName(leadName), supportingText = { if (showLeadErrors && !Validation.isValidName(leadName)) Text(Validation.NAME_ERROR) },
                                 label = { Text("Nombre completo *", fontWeight = FontWeight.Medium) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth().testTag("lead_input_name"),
@@ -421,7 +425,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
                                 value = leadPhone,
-                                onValueChange = { leadPhone = it },
+                                onValueChange = { leadPhone = it.take(20) }, isError = showLeadErrors && !Validation.isValidPhone(leadPhone), supportingText = { if (showLeadErrors && !Validation.isValidPhone(leadPhone)) Text(Validation.PHONE_ERROR) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                                 label = { Text("Celular / WhatsApp *", fontWeight = FontWeight.Medium) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth().testTag("lead_input_phone"),
@@ -430,7 +434,7 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
                                 value = leadEmail,
-                                onValueChange = { leadEmail = it },
+                                onValueChange = { leadEmail = it.take(160) }, isError = showLeadErrors && !Validation.isValidOptionalEmail(leadEmail), supportingText = { if (showLeadErrors && !Validation.isValidOptionalEmail(leadEmail)) Text(Validation.EMAIL_ERROR) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                                 label = { Text("Correo electrónico", fontWeight = FontWeight.Medium) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth(),
@@ -457,7 +461,8 @@ fun HomeScreen(
                             Spacer(modifier = Modifier.height(14.dp))
                             Button(
                                 onClick = {
-                                    if (leadName.isNotBlank() && leadPhone.isNotBlank()) {
+                                    showLeadErrors = true
+                        if (Validation.isValidName(leadName) && Validation.isValidPhone(leadPhone) && Validation.isValidOptionalEmail(leadEmail)) {
                                         viewModel.captureLead(
                                             fullName = leadName,
                                             phone = leadPhone,
