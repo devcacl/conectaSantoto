@@ -1,6 +1,14 @@
 package com.example.ui.screens
 
 import android.content.Intent
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoSurfaceVariant
+import com.example.ui.theme.SantotoRed
+import com.example.ui.theme.SantotoTextMuted
+import com.example.ui.theme.SantotoTextPrimary
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoTextSecondary
+import com.example.ui.theme.SantotoTextBody
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -191,7 +199,7 @@ fun AdmissionsDashboardScreen(
                                 maxLines = 1,
                                 softWrap = false,
                                 fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Medium,
-                                color = if (selectedTabIndex == index) SantotoGold else Color(0xFFCBD5E1)
+                                color = if (selectedTabIndex == index) SantotoGold else SantotoOutlineStrong
                             )
                         }
                     )
@@ -353,12 +361,12 @@ fun AdmissionsDashboardScreen(
 
     // High contrast dark text field colors for all dialogs (never white text on white bg)
     val adminFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color(0xFF0F172A),
-        unfocusedTextColor = Color(0xFF0F172A),
+        focusedTextColor = SantotoTextPrimary,
+        unfocusedTextColor = SantotoTextPrimary,
         focusedLabelColor = SantotoNavy,
-        unfocusedLabelColor = Color(0xFF475569),
+        unfocusedLabelColor = SantotoTextBody,
         focusedBorderColor = SantotoNavy,
-        unfocusedBorderColor = Color(0xFFCBD5E1),
+        unfocusedBorderColor = SantotoOutlineStrong,
         cursorColor = SantotoNavy,
         focusedContainerColor = Color.White,
         unfocusedContainerColor = Color.White
@@ -707,16 +715,16 @@ fun AdmissionsDashboardScreen(
                         VisitStatus.values().forEach { st ->
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = if (editStatus == st) SantotoNavy else Color(0xFFF1F5F9),
+                                color = if (editStatus == st) SantotoNavy else SantotoSurfaceVariant,
                                 modifier = Modifier
                                     .weight(1f)
                                     .clickable { editStatus = st }
                             ) {
                                 Text(
                                     text = st.label,
-                                    fontSize = 9.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (editStatus == st) SantotoGold else Color(0xFF475569),
+                                    color = if (editStatus == st) SantotoGold else SantotoTextBody,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                     modifier = Modifier.padding(vertical = 6.dp)
                                 )
@@ -778,7 +786,7 @@ fun AdmissionsDashboardScreen(
                         viewModel.deleteVisit(visit)
                         visitToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626), contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoRed, contentColor = Color.White)
                 ) {
                     Text("Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -786,9 +794,9 @@ fun AdmissionsDashboardScreen(
             dismissButton = {
                 Button(
                     onClick = { visitToDelete = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                 ) {
-                    Text("Cancelar", color = Color(0xFF475569))
+                    Text("Cancelar", color = SantotoTextBody)
                 }
             }
         )
@@ -1079,7 +1087,7 @@ fun AdmissionsDashboardScreen(
                         viewModel.deleteEvent(evt)
                         eventToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626), contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoRed, contentColor = Color.White)
                 ) {
                     Text("Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -1087,9 +1095,9 @@ fun AdmissionsDashboardScreen(
             dismissButton = {
                 Button(
                     onClick = { eventToDelete = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                 ) {
-                    Text("Cancelar", color = Color(0xFF475569))
+                    Text("Cancelar", color = SantotoTextBody)
                 }
             }
         )
@@ -1183,7 +1191,7 @@ fun AdmissionsDashboardScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = if (showAddWalkIn) "Cerrar" else "+ En Puerta",
-                                    fontSize = 10.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -1210,7 +1218,7 @@ fun AdmissionsDashboardScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column {
-                                            Text("RESUMEN DE ASISTENCIA EN TIEMPO REAL", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
+                                            Text("RESUMEN DE ASISTENCIA EN TIEMPO REAL", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                             Text(
                                                 text = "$attendedCount llegaron de $totalReg inscritos ($attendancePct%)",
                                                 fontSize = 14.sp,
@@ -1221,11 +1229,11 @@ fun AdmissionsDashboardScreen(
 
                                         Surface(
                                             shape = RoundedCornerShape(8.dp),
-                                            color = if (attendancePct >= 50) Color(0xFF10B981).copy(alpha = 0.15f) else SantotoYellow.copy(alpha = 0.2f)
+                                            color = if (attendancePct >= 50) SantotoSuccess.copy(alpha = 0.15f) else SantotoYellow.copy(alpha = 0.2f)
                                         ) {
                                             Text(
                                                 text = "${evt.availableSpots} cupos libres",
-                                                fontSize = 10.sp,
+                                                fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = SantotoNavy,
                                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -1242,8 +1250,8 @@ fun AdmissionsDashboardScreen(
                                             .fillMaxWidth()
                                             .height(8.dp)
                                             .clip(RoundedCornerShape(4.dp)),
-                                        color = Color(0xFF10B981),
-                                        trackColor = Color(0xFFE2E8F0)
+                                        color = SantotoSuccess,
+                                        trackColor = SantotoOutline
                                     )
                                 }
                             }
@@ -1352,14 +1360,14 @@ fun AdmissionsDashboardScreen(
                                     Surface(
                                         shape = RoundedCornerShape(16.dp),
                                         color = if (isSelected) SantotoNavy else Color.White,
-                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) SantotoNavy else Color(0xFFCBD5E1)),
+                                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) SantotoNavy else SantotoOutlineStrong),
                                         modifier = Modifier.clickable { attendanceFilter = label }
                                     ) {
                                         Text(
                                             text = "$label ($count)",
                                             fontSize = 11.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) SantotoGold else Color(0xFF334155),
+                                            color = if (isSelected) SantotoGold else SantotoTextBody,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                         )
                                     }
@@ -1395,7 +1403,7 @@ fun AdmissionsDashboardScreen(
                                 ),
                                 border = androidx.compose.foundation.BorderStroke(
                                     1.dp,
-                                    if (reg.attended) Color(0xFF86EFAC) else Color(0xFFE2E8F0)
+                                    if (reg.attended) Color(0xFF86EFAC) else SantotoOutline
                                 ),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                                 modifier = Modifier.fillMaxWidth()
@@ -1436,7 +1444,7 @@ fun AdmissionsDashboardScreen(
                                             ) {
                                                 Text(
                                                     text = reg.ticketCode,
-                                                    fontSize = 8.5.sp,
+                                                    fontSize = 11.sp,
                                                     fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
                                                     fontWeight = FontWeight.Bold,
                                                     color = SantotoGold,
@@ -1449,8 +1457,8 @@ fun AdmissionsDashboardScreen(
 
                                         Text(
                                             text = "Tel: ${reg.phone}" + if (reg.schoolOrOrigin.isNotBlank()) " • ${reg.schoolOrOrigin}" else "",
-                                            fontSize = 10.5.sp,
-                                            color = Color(0xFF475569)
+                                            fontSize = 11.sp,
+                                            color = SantotoTextBody
                                         )
 
                                         Spacer(modifier = Modifier.height(6.dp))
@@ -1472,7 +1480,7 @@ fun AdmissionsDashboardScreen(
                                             ) {
                                                 Text(
                                                     text = "WhatsApp",
-                                                    fontSize = 9.sp,
+                                                    fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color(0xFF15803D),
                                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -1489,7 +1497,7 @@ fun AdmissionsDashboardScreen(
                                             ) {
                                                 Text(
                                                     text = "Llamar",
-                                                    fontSize = 9.sp,
+                                                    fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = SantotoNavy,
                                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -1507,7 +1515,7 @@ fun AdmissionsDashboardScreen(
                                         },
                                         shape = RoundedCornerShape(8.dp),
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = if (reg.attended) Color(0xFF10B981) else Color(0xFFE2E8F0),
+                                            containerColor = if (reg.attended) SantotoSuccess else SantotoOutline,
                                             contentColor = if (reg.attended) Color.White else Color(0xFF1E293B)
                                         ),
                                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
@@ -1521,7 +1529,7 @@ fun AdmissionsDashboardScreen(
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = if (reg.attended) "¡Llegó!" else "Marcar Llegada",
-                                            fontSize = 10.sp,
+                                            fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                     }
@@ -1594,7 +1602,7 @@ fun AdmissionsDashboardScreen(
                             ) {
                                 Text(
                                     text = cat,
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = if (isSel) SantotoGold else Color.DarkGray,
                                     fontWeight = if (isSel) FontWeight.Bold else FontWeight.Normal,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
@@ -1848,7 +1856,7 @@ fun AdmissionsDashboardScreen(
                         viewModel.deleteNews(item)
                         newsToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626), contentColor = Color.White)
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoRed, contentColor = Color.White)
                 ) {
                     Text("Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -1856,9 +1864,9 @@ fun AdmissionsDashboardScreen(
             dismissButton = {
                 Button(
                     onClick = { newsToDelete = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                 ) {
-                    Text("Cancelar", color = Color(0xFF475569))
+                    Text("Cancelar", color = SantotoTextBody)
                 }
             }
         )
@@ -2032,7 +2040,7 @@ private fun LeadCard(
 
             Text(
                 text = "Cel: ${lead.phone}" + if (lead.email.isNotBlank()) " • ${lead.email}" else "",
-                fontSize = 10.sp,
+                fontSize = 11.sp,
                 color = Color.DarkGray
             )
 
@@ -2045,8 +2053,8 @@ private fun LeadCard(
                 ) {
                     Text(
                         text = "Nota: ${lead.notes}",
-                        fontSize = 10.sp,
-                        color = Color(0xFF475569),
+                        fontSize = 11.sp,
+                        color = SantotoTextBody,
                         modifier = Modifier.padding(6.dp)
                     )
                 }
@@ -2182,7 +2190,7 @@ private fun AdminVisitsCalendarTab(
                         Text(
                             text = "${visits.size} citas registradas • ${pendingLeads.size} leads por agendar",
                             color = SantotoGold,
-                            fontSize = 10.sp
+                            fontSize = 11.sp
                         )
                     }
 
@@ -2284,7 +2292,7 @@ private fun AdminVisitsCalendarTab(
                             ) {
                                 Text(
                                     text = visit.dateText,
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SantotoGold,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -2303,7 +2311,7 @@ private fun AdminVisitsCalendarTab(
                                 ) {
                                     Text(
                                         text = visit.status.label,
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = when (visit.status) {
                                             VisitStatus.AGENDADA -> Color(0xFFB45309)
@@ -2367,7 +2375,7 @@ private fun AdminVisitsCalendarTab(
 
                         Text(
                             text = "Acompañantes: ${visit.visitorCount} • Tel: ${visit.phone}",
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             color = Color.Gray
                         )
 
@@ -2384,7 +2392,7 @@ private fun AdminVisitsCalendarTab(
                                     colors = ButtonDefaults.buttonColors(containerColor = SantotoNavy, contentColor = Color.White),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Confirmar", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    Text("Confirmar", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                 }
                             }
 
@@ -2395,7 +2403,7 @@ private fun AdminVisitsCalendarTab(
                                     colors = ButtonDefaults.buttonColors(containerColor = SantotoSuccess, contentColor = Color.White),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Realizada", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    Text("Realizada", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                                 }
                             }
                         }
@@ -2419,8 +2427,8 @@ private fun AdminVisitsCalendarTab(
             }
             Text(
                 text = "Agrega y agenda rápidamente una visita personalizada con un solo toque",
-                fontSize = 10.sp,
-                color = Color(0xFF64748B)
+                fontSize = 11.sp,
+                color = SantotoTextSecondary
             )
         }
 
@@ -2444,7 +2452,7 @@ private fun AdminVisitsCalendarTab(
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -2454,8 +2462,8 @@ private fun AdminVisitsCalendarTab(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(text = lead.fullName, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = SantotoNavy)
-                            Text(text = "Interés: ${lead.programInterest}", fontSize = 10.sp, color = Color(0xFF334155))
-                            Text(text = "Tel: ${lead.phone}" + if (lead.cityOrSchool.isNotBlank()) " • ${lead.cityOrSchool}" else "", fontSize = 10.sp, color = Color.Gray)
+                            Text(text = "Interés: ${lead.programInterest}", fontSize = 11.sp, color = SantotoTextBody)
+                            Text(text = "Tel: ${lead.phone}" + if (lead.cityOrSchool.isNotBlank()) " • ${lead.cityOrSchool}" else "", fontSize = 11.sp, color = Color.Gray)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -2466,7 +2474,7 @@ private fun AdminVisitsCalendarTab(
                         ) {
                             Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = SantotoGold, modifier = Modifier.size(13.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Agendar Visita", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("Agendar Visita", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     }
                 }
@@ -2509,7 +2517,7 @@ private fun AdminEventsManagementTab(
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text("Gestión de Eventos & Asistencia", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp)
-                            Text("Cupos en tiempo real, inscritos y control de asistencia", color = Color(0xFFCBD5E1), fontSize = 10.sp)
+                            Text("Cupos en tiempo real, inscritos y control de asistencia", color = SantotoOutlineStrong, fontSize = 11.sp)
                         }
                     }
 
@@ -2593,7 +2601,7 @@ private fun AdminEventsManagementTab(
                                 ) {
                                     Text(
                                         text = event.dateBadge,
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -2605,7 +2613,7 @@ private fun AdminEventsManagementTab(
                                 ) {
                                     Text(
                                         text = event.category,
-                                        fontSize = 8.5.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
@@ -2625,7 +2633,7 @@ private fun AdminEventsManagementTab(
 
                             Text(
                                 text = "${event.location} • ${event.time}",
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 color = Color.Gray,
                                 maxLines = 1
                             )
@@ -2635,7 +2643,7 @@ private fun AdminEventsManagementTab(
                             // Real-time cupos
                             Text(
                                 text = "Cupos: ${event.availableSpots} disp. de ${event.capacity} total",
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = if (event.availableSpots <= 5) Color.Red else SantotoNavy
                             )
@@ -2675,8 +2683,8 @@ private fun AdminEventsManagementTab(
                                 )
                                 Text(
                                     text = "$attendedCount llegaron • ${eventRegs.size - attendedCount} pendientes",
-                                    fontSize = 9.5.sp,
-                                    color = Color(0xFF475569)
+                                    fontSize = 11.sp,
+                                    color = SantotoTextBody
                                 )
                             }
 
@@ -2693,7 +2701,7 @@ private fun AdminEventsManagementTab(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "Asistencia (${eventRegs.size})",
-                                    fontSize = 10.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -2747,7 +2755,7 @@ private fun AdminNewsManagementTab(
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text("Administración de Noticias USTA", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp)
-                            Text("CRUD completo de artículos, boletines y comunicados", color = Color(0xFFCBD5E1), fontSize = 10.sp)
+                            Text("CRUD completo de artículos, boletines y comunicados", color = SantotoOutlineStrong, fontSize = 11.sp)
                         }
                     }
 
@@ -2784,10 +2792,10 @@ private fun AdminNewsManagementTab(
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color(0xFF0F172A),
-                    unfocusedTextColor = Color(0xFF0F172A),
+                    focusedTextColor = SantotoTextPrimary,
+                    unfocusedTextColor = SantotoTextPrimary,
                     focusedBorderColor = SantotoNavy,
-                    unfocusedBorderColor = Color(0xFFCBD5E1),
+                    unfocusedBorderColor = SantotoOutlineStrong,
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White
                 ),
@@ -2849,14 +2857,14 @@ private fun AdminNewsManagementTab(
                             ) {
                                 Text(
                                     text = newsItem.category,
-                                    fontSize = 8.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SantotoNavy,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(newsItem.dateText, fontSize = 9.sp, color = Color.Gray)
+                            Text(newsItem.dateText, fontSize = 11.sp, color = Color.Gray)
                         }
 
                         Spacer(modifier = Modifier.height(3.dp))
@@ -2871,7 +2879,7 @@ private fun AdminNewsManagementTab(
 
                         Text(
                             text = newsItem.summary,
-                            fontSize = 9.5.sp,
+                            fontSize = 11.sp,
                             color = Color.DarkGray,
                             maxLines = 2,
                             lineHeight = 13.sp
@@ -3108,7 +3116,7 @@ private fun ChatbotAnalyticsTab(
                                         Box(contentAlignment = Alignment.Center) {
                                             Text(
                                                 text = "${idx + 1}",
-                                                fontSize = 10.sp,
+                                                fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = if (idx == 0) SantotoNavy else SantotoNavyDark
                                             )
@@ -3117,7 +3125,7 @@ private fun ChatbotAnalyticsTab(
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(program, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = SantotoNavyDark)
                                 }
-                                Text("$count consultas", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
+                                Text("$count consultas", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             LinearProgressIndicator(
@@ -3152,11 +3160,11 @@ private fun KpiCard(
         modifier = modifier
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
-            Text(title, fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+            Text(title, fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(2.dp))
             Text(value, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = color)
             Spacer(modifier = Modifier.height(1.dp))
-            Text(subtitle, fontSize = 8.sp, color = SantotoNavyDark)
+            Text(subtitle, fontSize = 11.sp, color = SantotoNavyDark)
         }
     }
 }
@@ -3177,7 +3185,7 @@ private fun StatusFilterChip(
     ) {
         Text(
             text = label,
-            fontSize = 10.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = if (isSelected) Color.White else color,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -3205,14 +3213,14 @@ fun AdminRagDocumentsTab(
     var showResetConfirm by remember { mutableStateOf(false) }
 
     val docFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color(0xFF0F172A),
-        unfocusedTextColor = Color(0xFF0F172A),
+        focusedTextColor = SantotoTextPrimary,
+        unfocusedTextColor = SantotoTextPrimary,
         focusedLabelColor = SantotoNavy,
-        unfocusedLabelColor = Color(0xFF475569),
+        unfocusedLabelColor = SantotoTextBody,
         focusedBorderColor = SantotoNavy,
-        unfocusedBorderColor = Color(0xFF94A3B8),
+        unfocusedBorderColor = SantotoTextMuted,
         cursorColor = SantotoNavy,
-        focusedContainerColor = Color(0xFFF8FAFC),
+        focusedContainerColor = SantotoBg,
         unfocusedContainerColor = Color.White
     )
 
@@ -3258,7 +3266,7 @@ fun AdminRagDocumentsTab(
                                 )
                                 Text(
                                     text = "${ragDocuments.size} documentos de conocimiento activos en tiempo real",
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = SantotoYellow
                                 )
                             }
@@ -3328,7 +3336,7 @@ fun AdminRagDocumentsTab(
                         shape = RoundedCornerShape(10.dp),
                         color = if (isSelected) SantotoNavy else Color.White,
                         modifier = Modifier
-                            .border(1.dp, if (isSelected) SantotoNavy else Color(0xFFCBD5E1), RoundedCornerShape(10.dp))
+                            .border(1.dp, if (isSelected) SantotoNavy else SantotoOutlineStrong, RoundedCornerShape(10.dp))
                             .clickable {
                                 selectedCategoryFilter = if (cat == "Todos") null else cat
                             }
@@ -3367,7 +3375,7 @@ fun AdminRagDocumentsTab(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline),
                     modifier = Modifier.fillMaxWidth().testTag("rag_doc_card_${doc.id}")
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
@@ -3389,7 +3397,7 @@ fun AdminRagDocumentsTab(
                                 ) {
                                     Text(
                                         text = doc.category.uppercase(),
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = if (doc.category == "Inversión") SantotoNavy else Color.White,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -3406,7 +3414,7 @@ fun AdminRagDocumentsTab(
 
                             Text(
                                 text = "${doc.content.length} caracteres",
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 color = Color.Gray
                             )
                         }
@@ -3414,8 +3422,8 @@ fun AdminRagDocumentsTab(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Actualizado: " + dateFormat.format(Date(doc.lastUpdated)),
-                            fontSize = 10.sp,
-                            color = Color(0xFF64748B)
+                            fontSize = 11.sp,
+                            color = SantotoTextSecondary
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -3423,14 +3431,14 @@ fun AdminRagDocumentsTab(
                         // Preview of content in styled container
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = Color(0xFFF8FAFC),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                            color = SantotoBg,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, SantotoOutline),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
                                 text = doc.content.take(220) + if (doc.content.length > 220) "..." else "",
                                 fontSize = 11.sp,
-                                color = Color(0xFF334155),
+                                color = SantotoTextBody,
                                 modifier = Modifier.padding(10.dp),
                                 lineHeight = 16.sp
                             )
@@ -3450,9 +3458,9 @@ fun AdminRagDocumentsTab(
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                                 modifier = Modifier.testTag("delete_doc_btn_${doc.id}")
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFDC2626), modifier = Modifier.size(13.dp))
+                                Icon(Icons.Default.Delete, contentDescription = null, tint = SantotoRed, modifier = Modifier.size(13.dp))
                                 Spacer(modifier = Modifier.width(3.dp))
-                                Text("Eliminar", fontSize = 11.sp, color = Color(0xFFDC2626), fontWeight = FontWeight.Bold)
+                                Text("Eliminar", fontSize = 11.sp, color = SantotoRed, fontWeight = FontWeight.Bold)
                             }
 
                             Spacer(modifier = Modifier.width(8.dp))
@@ -3548,9 +3556,9 @@ fun AdminRagDocumentsTab(
                                 localShowCreateDialog = false
                                 onDismissCreateDialog()
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                            colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                         ) {
-                            Text("Cancelar", color = Color(0xFF475569), fontSize = 12.sp)
+                            Text("Cancelar", color = SantotoTextBody, fontSize = 12.sp)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -3639,9 +3647,9 @@ fun AdminRagDocumentsTab(
                     ) {
                         Button(
                             onClick = { docToEdit = null },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                            colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                         ) {
-                            Text("Cancelar", color = Color(0xFF475569), fontSize = 12.sp)
+                            Text("Cancelar", color = SantotoTextBody, fontSize = 12.sp)
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(
@@ -3680,7 +3688,7 @@ fun AdminRagDocumentsTab(
                         onDeleteDocument(doc)
                         docToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoRed)
                 ) {
                     Text("Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -3688,9 +3696,9 @@ fun AdminRagDocumentsTab(
             dismissButton = {
                 Button(
                     onClick = { docToDelete = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                 ) {
-                    Text("Cancelar", color = Color(0xFF475569))
+                    Text("Cancelar", color = SantotoTextBody)
                 }
             }
         )
@@ -3716,9 +3724,9 @@ fun AdminRagDocumentsTab(
             dismissButton = {
                 Button(
                     onClick = { showResetConfirm = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9))
+                    colors = ButtonDefaults.buttonColors(containerColor = SantotoSurfaceVariant)
                 ) {
-                    Text("Cancelar", color = Color(0xFF475569))
+                    Text("Cancelar", color = SantotoTextBody)
                 }
             }
         )

@@ -1,9 +1,10 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "event_registrations")
+@Entity(tableName = "event_registrations", indices = [Index(value = ["remoteId"], unique = true)])
 data class EventRegistration(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -15,5 +16,7 @@ data class EventRegistration(
     val schoolOrOrigin: String = "",
     val attended: Boolean = false, // Registrar si asistió o no (check-in)
     val registeredAt: Long = System.currentTimeMillis(),
-    val ticketCode: String = "" // e.g. "USTA-OPENDAY-7341"
+    val ticketCode: String = "", // e.g. "USTA-OPENDAY-7341"
+    /** ID del documento en Firestore; null si la inscripción es solo local. */
+    val remoteId: String? = null
 )

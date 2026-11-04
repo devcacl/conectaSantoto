@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(./gradlew:*)",
+      "PowerShell(.\\gradlew.bat:*)",
+      "PowerShell(adb devices:*)",
+      "PowerShell(java -version:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./*.jks)",
+      "Read(./*.keystore)"
+    ]
+  }
+}

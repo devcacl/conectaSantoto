@@ -8,12 +8,28 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.data.remote.adminSignInErrorMessage
 import com.example.ui.components.SantotoBottomBar
 import com.example.ui.components.SantotoHeader
 import com.example.ui.screens.AdmissionsDashboardScreen
@@ -44,6 +60,69 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** Acceso de Admisiones con Firebase Auth (correo y contraseña). */
+@Composable
+private fun AdminLoginDialog(
+    onDismiss: () -> Unit,
+    onSignIn: (String, String, (Result<Unit>) -> Unit) -> Unit,
+    onAuthorized: () -> Unit
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = { if (!loading) onDismiss() },
+        title = { Text("Acceso Administrativo", fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                Text(
+                    "Ingresa con tu cuenta del equipo de Admisiones.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it; error = null },
+                    label = { Text("Correo") },
+                    singleLine = true,
+                    enabled = !loading,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it; error = null },
+                    label = { Text("Contraseña") },
+                    singleLine = true,
+                    enabled = !loading,
+                    isError = error != null,
+                    supportingText = { error?.let { Text(it) } },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = !loading && email.isNotBlank() && password.isNotEmpty(),
+                onClick = {
+                    loading = true
+                    error = null
+                    onSignIn(email, password) { result ->
+                        loading = false
+                        result
+                            .onSuccess { onAuthorized() }
+                            .onFailure { error = adminSignInErrorMessage(it) }
+                    }
+                }
+            ) { Text(if (loading) "Ingresando…" else "Ingresar") }
+        },
+        dismissButton = { TextButton(enabled = !loading, onClick = onDismiss) { Text("Cancelar") } }
+    )
+}
+
 @Composable
 fun SantotoApp(
     viewModel: SantotoViewModel = viewModel()
@@ -51,6 +130,18 @@ fun SantotoApp(
     val currentRole by viewModel.currentRole.collectAsStateWithLifecycle()
     val currentScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
     val isVrModeEnabled by viewModel.isVrModeEnabled.collectAsStateWithLifecycle()
+
+    var showAdminLoginDialog by remember { mutableStateOf(false) }
+    if (showAdminLoginDialog) {
+        AdminLoginDialog(
+            onDismiss = { showAdminLoginDialog = false },
+            onSignIn = viewModel::adminSignIn,
+            onAuthorized = {
+                showAdminLoginDialog = false
+                viewModel.setRole(UserRole.PROFESIONAL_ADMISIONES)
+            }
+        )
+    }
 
     val showHeaderBack = currentScreen !is Screen.Home && currentScreen !is Screen.AdmissionsPanel
 
@@ -87,12 +178,11 @@ fun SantotoApp(
                 SantotoHeader(
                     currentRole = currentRole,
                     onToggleRole = {
-                        val nextRole = if (currentRole == UserRole.ASPIRANTE) {
-                            UserRole.PROFESIONAL_ADMISIONES
+                        if (currentRole == UserRole.ASPIRANTE) {
+                            showAdminLoginDialog = true
                         } else {
-                            UserRole.ASPIRANTE
+                            viewModel.setRole(UserRole.ASPIRANTE)
                         }
-                        viewModel.setRole(nextRole)
                     },
                     showBackButton = showHeaderBack,
                     onBackClick = { viewModel.navigateBack() },

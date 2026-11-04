@@ -1,6 +1,10 @@
 package com.example.ui.screens
 
 import android.content.Intent
+import com.example.ui.theme.SantotoOutline
+import com.example.ui.theme.SantotoTextPrimary
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoTextBody
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -172,10 +176,10 @@ fun NewsScreen(
                     shape = RoundedCornerShape(14.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF0F172A),
-                        unfocusedTextColor = Color(0xFF0F172A),
+                        focusedTextColor = SantotoTextPrimary,
+                        unfocusedTextColor = SantotoTextPrimary,
                         focusedBorderColor = SantotoNavy,
-                        unfocusedBorderColor = Color(0xFFCBD5E1),
+                        unfocusedBorderColor = SantotoOutlineStrong,
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White
                     ),
@@ -193,7 +197,7 @@ fun NewsScreen(
                             color = if (isSelected) SantotoNavy else Color.White,
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                if (isSelected) SantotoNavy else Color(0xFFCBD5E1)
+                                if (isSelected) SantotoNavy else SantotoOutlineStrong
                             ),
                             modifier = Modifier.clickable { selectedCategory = cat }
                         ) {
@@ -201,7 +205,7 @@ fun NewsScreen(
                                 text = cat,
                                 fontSize = 11.5.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) SantotoGold else Color(0xFF334155),
+                                color = if (isSelected) SantotoGold else SantotoTextBody,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                             )
                         }
@@ -254,7 +258,7 @@ fun NewsScreen(
                                 ) {
                                     Text(
                                         text = featuredNews.category.uppercase(),
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -270,12 +274,12 @@ fun NewsScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(featuredNews.dateText, fontSize = 10.sp, color = Color.Gray)
+                                        Text(featuredNews.dateText, fontSize = 11.sp, color = Color.Gray)
                                     }
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(Icons.Default.AccessTime, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Lectura ${featuredNews.readTimeMinutes} min", fontSize = 10.sp, color = Color.Gray)
+                                        Text("Lectura ${featuredNews.readTimeMinutes} min", fontSize = 11.sp, color = Color.Gray)
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(6.dp))
@@ -289,7 +293,7 @@ fun NewsScreen(
                                 Text(
                                     text = featuredNews.summary,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF475569),
+                                    color = SantotoTextBody,
                                     lineHeight = 16.sp
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -383,13 +387,13 @@ fun NewsScreen(
                                 ) {
                                     Text(
                                         text = newsItem.category,
-                                        fontSize = 9.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                     )
                                 }
-                                Text(newsItem.dateText, fontSize = 9.sp, color = Color.Gray)
+                                Text(newsItem.dateText, fontSize = 11.sp, color = Color.Gray)
                             }
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -408,7 +412,7 @@ fun NewsScreen(
                                 text = newsItem.summary,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.sp,
                                 maxLines = 2,
                                 lineHeight = 14.sp
                             )
@@ -518,7 +522,7 @@ fun NewsScreen(
                                     Text(
                                         text = article.category.uppercase(),
                                         fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         color = SantotoNavy,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
@@ -553,7 +557,7 @@ fun NewsScreen(
                             }
 
                             Spacer(modifier = Modifier.height(14.dp))
-                            HorizontalDivider(color = Color(0xFFE2E8F0))
+                            HorizontalDivider(color = SantotoOutline)
                             Spacer(modifier = Modifier.height(14.dp))
 
                             Text(
@@ -569,7 +573,7 @@ fun NewsScreen(
                             Text(
                                 text = article.content,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF334155),
+                                color = SantotoTextBody,
                                 lineHeight = 22.sp
                             )
 

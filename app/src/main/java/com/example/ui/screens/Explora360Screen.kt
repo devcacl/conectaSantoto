@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import android.annotation.SuppressLint
+import com.example.ui.theme.SantotoTextPrimary
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -172,7 +173,7 @@ fun Explora360Screen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0F172A))
+            .background(SantotoTextPrimary)
     ) {
         // TOP CONTROL HEADER - COMPACT TITLE AND GENEROUS BUTTON SPACING
         Surface(
@@ -208,7 +209,7 @@ fun Explora360Screen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = "Sede Tunja",
-                                fontSize = 9.sp,
+                                fontSize = 11.sp,
                                 color = SantotoYellow
                             )
                             if (isGyroscopeActive) {
@@ -219,7 +220,7 @@ fun Explora360Screen(
                                 ) {
                                     Text(
                                         text = "GIROSCOPIO ON",
-                                        fontSize = 8.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = SantotoYellow,
                                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)

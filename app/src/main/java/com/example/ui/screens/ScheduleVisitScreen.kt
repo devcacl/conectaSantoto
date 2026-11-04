@@ -1,6 +1,12 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import com.example.util.Validation
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import com.example.ui.theme.SantotoTextBody
+import com.example.ui.theme.SantotoTextMuted
+import com.example.ui.theme.SantotoTextPrimary
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,6 +59,7 @@ import com.example.ui.theme.SantotoBg
 import com.example.ui.theme.SantotoCyan
 import com.example.ui.theme.SantotoGold
 import com.example.ui.theme.SantotoNavy
+import com.example.util.DateUtils
 import com.example.ui.theme.SantotoNavyDark
 import com.example.ui.theme.SantotoSuccess
 import com.example.viewmodel.SantotoViewModel
@@ -70,8 +77,11 @@ fun ScheduleVisitScreen(
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var school by remember { mutableStateOf("") }
+    var showErrors by remember { mutableStateOf(false) }
     var selectedCampus by remember { mutableStateOf("Campus Av. Universitaria") }
-    var selectedDateText by remember { mutableStateOf("2026-10-15") }
+    val todayText = remember { DateUtils.dayText(0) }
+    val availableDays = remember { DateUtils.upcomingBusinessDays(8) }
+    var selectedDateText by remember { mutableStateOf(DateUtils.nextBusinessDay()) }
     var selectedTimeSlot by remember { mutableStateOf("09:00 AM - 11:00 AM") }
     var programInterest by remember { mutableStateOf("Ingeniería de Sistemas") }
     var visitorCount by remember { mutableIntStateOf(2) }
@@ -148,7 +158,8 @@ fun ScheduleVisitScreen(
                 InteractiveCalendarView(
                     selectedDateText = selectedDateText,
                     onDateSelected = { date -> selectedDateText = date },
-                    highlightedDates = setOf("2026-10-15", "2026-10-16", "2026-10-17", "2026-10-20", "2026-10-24")
+                    highlightedDates = availableDays,
+                    minDateText = todayText
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -203,7 +214,7 @@ fun ScheduleVisitScreen(
                         ) {
                             Text(
                                 text = slot,
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isSelected) SantotoGold else SantotoNavy,
                                 modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
@@ -254,7 +265,7 @@ fun ScheduleVisitScreen(
                                     )
                                     Text(
                                         text = desc,
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         color = if (isSelected) Color(0xFFCADBE8) else Color.Gray
                                     )
                                 }
@@ -279,21 +290,21 @@ fun ScheduleVisitScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     val visitFieldColors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF0F172A),
-                        unfocusedTextColor = Color(0xFF0F172A),
+                        focusedTextColor = SantotoTextPrimary,
+                        unfocusedTextColor = SantotoTextPrimary,
                         focusedLabelColor = SantotoNavy,
-                        unfocusedLabelColor = Color(0xFF475569),
+                        unfocusedLabelColor = SantotoTextBody,
                         focusedBorderColor = SantotoNavy,
-                        unfocusedBorderColor = Color(0xFF94A3B8),
+                        unfocusedBorderColor = SantotoTextMuted,
                         cursorColor = SantotoNavy,
-                        focusedContainerColor = Color(0xFFF8FAFC),
+                        focusedContainerColor = SantotoBg,
                         unfocusedContainerColor = Color(0xFFFFFFFF)
                     )
 
                     Column(modifier = Modifier.padding(16.dp)) {
                         OutlinedTextField(
                             value = studentName,
-                            onValueChange = { studentName = it },
+                            onValueChange = { studentName = it.take(120) }, isError = showErrors && !Validation.isValidName(studentName), supportingText = { if (showErrors && !Validation.isValidName(studentName)) Text(Validation.NAME_ERROR) },
                             label = { Text("Nombre y apellidos *", fontWeight = FontWeight.Medium) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth().testTag("visit_name_input"),
@@ -302,7 +313,7 @@ fun ScheduleVisitScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = phone,
-                            onValueChange = { phone = it },
+                            onValueChange = { phone = it.take(20) }, isError = showErrors && !Validation.isValidPhone(phone), supportingText = { if (showErrors && !Validation.isValidPhone(phone)) Text(Validation.PHONE_ERROR) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             label = { Text("Celular / WhatsApp *", fontWeight = FontWeight.Medium) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth().testTag("visit_phone_input"),
@@ -311,7 +322,7 @@ fun ScheduleVisitScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { email = it },
+                            onValueChange = { email = it.take(160) }, isError = showErrors && !Validation.isValidOptionalEmail(email), supportingText = { if (showErrors && !Validation.isValidOptionalEmail(email)) Text(Validation.EMAIL_ERROR) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                             label = { Text("Correo electrónico", fontWeight = FontWeight.Medium) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth(),
@@ -356,7 +367,7 @@ fun ScheduleVisitScreen(
                                             Text(
                                                 text = "$count",
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 10.sp,
+                                                fontSize = 11.sp,
                                                 color = if (visitorCount == count) SantotoGold else SantotoNavyDark
                                             )
                                         }
@@ -372,7 +383,8 @@ fun ScheduleVisitScreen(
             item {
                 Button(
                     onClick = {
-                        if (studentName.isNotBlank() && phone.isNotBlank()) {
+                        showErrors = true
+                        if (Validation.isValidName(studentName) && Validation.isValidPhone(phone) && Validation.isValidOptionalEmail(email)) {
                             viewModel.scheduleCampusVisit(
                                 studentName = studentName,
                                 phone = phone,
@@ -436,7 +448,7 @@ fun ScheduleVisitScreen(
                                 ) {
                                     Text(
                                         text = "PASE OFICIAL DE VISITA",
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = SantotoNavyDark,
                                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -463,11 +475,11 @@ fun ScheduleVisitScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("SEDE / CAMPUS", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("SEDE / CAMPUS", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text(selectedCampus, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("ACOMPAÑANTES", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("ACOMPAÑANTES", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text("$visitorCount Personas", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                             }
@@ -479,11 +491,11 @@ fun ScheduleVisitScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Column {
-                                    Text("FECHA", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("FECHA", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text(selectedDateText, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("HORARIO", fontSize = 9.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
+                                    Text("HORARIO", fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
                                     Text(selectedTimeSlot, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = SantotoNavy)
                                 }
                             }

@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 enum class LeadStatus(val label: String, val colorHex: Long) {
@@ -12,7 +13,7 @@ enum class LeadStatus(val label: String, val colorHex: Long) {
     MATRICULADO("Matriculado", 0xFF1E8E3E)
 }
 
-@Entity(tableName = "leads")
+@Entity(tableName = "leads", indices = [Index(value = ["remoteId"], unique = true)])
 data class Lead(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -24,5 +25,7 @@ data class Lead(
     val degreeLevel: String = "Pregrado",
     val status: LeadStatus = LeadStatus.NUEVO,
     val notes: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    /** ID del documento en Firestore; null si el lead es solo local (datos de ejemplo). */
+    val remoteId: String? = null
 )

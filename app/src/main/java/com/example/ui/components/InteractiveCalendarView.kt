@@ -1,6 +1,8 @@
 package com.example.ui.components
 
 import androidx.compose.foundation.background
+import com.example.ui.theme.SantotoOutlineStrong
+import com.example.ui.theme.SantotoTextSecondary
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,11 +52,19 @@ fun InteractiveCalendarView(
     selectedDateText: String, // e.g. "2026-10-15"
     onDateSelected: (String) -> Unit,
     highlightedDates: Set<String> = emptySet(), // Dates that have events or visits
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    minDateText: String? = null // Fechas anteriores (yyyy-MM-dd) quedan deshabilitadas
 ) {
-    // We default to October 2026
-    var currentYear by remember { mutableIntStateOf(2026) }
-    var currentMonth by remember { mutableIntStateOf(10) } // 1-12
+    // Arranca en el mes de la fecha seleccionada (o el mes actual)
+    val initial = remember {
+        val parts = selectedDateText.split("-")
+        val cal = java.util.Calendar.getInstance()
+        val y = parts.getOrNull(0)?.toIntOrNull() ?: cal.get(java.util.Calendar.YEAR)
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: (cal.get(java.util.Calendar.MONTH) + 1)
+        y to m
+    }
+    var currentYear by remember { mutableIntStateOf(initial.first) }
+    var currentMonth by remember { mutableIntStateOf(initial.second) } // 1-12
 
     val monthNames = listOf(
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -153,7 +163,7 @@ fun InteractiveCalendarView(
                         text = dayName,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF64748B),
+                        color = SantotoTextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(36.dp)
                     )
@@ -181,6 +191,7 @@ fun InteractiveCalendarView(
                             val formattedDate = String.format("%04d-%02d-%02d", currentYear, currentMonth, dayNumber)
                             val isSelected = selectedDateText.startsWith(formattedDate)
                             val hasActivity = highlightedDates.any { it.startsWith(formattedDate) }
+                            val isPast = minDateText != null && formattedDate < minDateText
 
                             Box(
                                 modifier = Modifier
@@ -192,7 +203,7 @@ fun InteractiveCalendarView(
                                             else -> Color.Transparent
                                         }
                                     )
-                                    .clickable { onDateSelected(formattedDate) },
+                                    .clickable(enabled = !isPast) { onDateSelected(formattedDate) },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Column(
@@ -205,6 +216,7 @@ fun InteractiveCalendarView(
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = when {
                                             isSelected -> SantotoYellow
+                                            isPast -> SantotoOutlineStrong
                                             else -> SantotoNavy
                                         }
                                     )

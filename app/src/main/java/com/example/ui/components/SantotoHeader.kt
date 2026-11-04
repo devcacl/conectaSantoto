@@ -135,7 +135,7 @@ fun SantotoHeader(
                             ) {
                                 Text(
                                     text = if (currentRole == UserRole.PROFESIONAL_ADMISIONES) "ADMIN" else "ASPIRANTE",
-                                    fontSize = 8.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = if (currentRole == UserRole.PROFESIONAL_ADMISIONES) SantotoNavy else Color.White,
                                     modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
@@ -174,28 +174,6 @@ fun SantotoHeader(
                         )
                     }
 
-                    IconButton(
-                        onClick = { /* Notificaciones */ },
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    containerColor = SantotoYellow,
-                                    contentColor = SantotoNavy
-                                ) {
-                                    Text("2", fontSize = 9.sp, fontWeight = FontWeight.Bold)
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notificaciones",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
                 }
             }
 

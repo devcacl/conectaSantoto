@@ -22,6 +22,7 @@ import com.example.data.rag.CampusTourData
 import com.example.data.rag.SantotoKnowledgeBase
 import com.example.data.rag.SantotoRagEngine
 import com.example.data.rag.VocationalTestData
+import com.example.data.remote.AdmissionsBackend
 import com.example.data.repository.SantotoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,15 +55,28 @@ sealed class Screen {
 
 class SantotoViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val backend = AdmissionsBackend(application)
     private val repository: SantotoRepository
+    private var stopAdminSync: (() -> Unit)? = null
 
     init {
         val database = SantotoDatabase.getDatabase(application)
-        repository = SantotoRepository(database.santotoDao())
+        repository = SantotoRepository(database.santotoDao(), backend)
         viewModelScope.launch {
             repository.seedInitialDataIfEmpty()
         }
+        backend.resetToAspirante()
+        repository.syncPending()
     }
+
+    override fun onCleared() {
+        stopAdminSync?.invoke()
+        super.onCleared()
+    }
+
+    /** Acceso de Admisiones con Firebase Auth; solo autoriza si existe admins/{uid}. */
+    fun adminSignIn(email: String, password: String, onResult: (Result<Unit>) -> Unit) =
+        backend.adminSignIn(email, password, onResult)
 
     // Role and Navigation
     private val _currentRole = MutableStateFlow(UserRole.ASPIRANTE)
@@ -75,9 +89,13 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
 
     fun setRole(role: UserRole) {
         _currentRole.value = role
+        stopAdminSync?.invoke()
+        stopAdminSync = null
         if (role == UserRole.PROFESIONAL_ADMISIONES) {
+            stopAdminSync = repository.startAdminSync()
             navigateTo(Screen.AdmissionsPanel)
         } else {
+            backend.adminSignOut()
             navigateTo(Screen.Home)
         }
     }
@@ -90,6 +108,15 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun navigateBack(): Boolean {
+        if (_currentScreen.value is Screen.EventTicket) {
+            // Después de inscribirse no se regresa al formulario (evita inscribirse dos veces)
+            while (screenBackStack.isNotEmpty() && screenBackStack.last() !is Screen.Events) {
+                screenBackStack.removeAt(screenBackStack.lastIndex)
+            }
+            _currentScreen.value =
+                if (screenBackStack.isNotEmpty()) screenBackStack.removeAt(screenBackStack.lastIndex) else Screen.Events
+            return true
+        }
         if (screenBackStack.isNotEmpty()) {
             _currentScreen.value = screenBackStack.removeAt(screenBackStack.lastIndex)
             return true
@@ -388,20 +415,10 @@ class SantotoViewModel(application: Application) : AndroidViewModel(application)
     val isChatLoading: StateFlow<Boolean> = _isChatLoading.asStateFlow()
 
     // Analytics Tracker for Chatbot
-    private val _totalQueriesCount = MutableStateFlow(42)
+    private val _totalQueriesCount = MutableStateFlow(0)
     val totalQueriesCount: StateFlow<Int> = _totalQueriesCount.asStateFlow()
 
-    private val _queriedProgramsStats = MutableStateFlow(
-        mapOf(
-            "Ingeniería de Sistemas" to 15,
-            "Derecho" to 11,
-            "Ingeniería de Datos e IA" to 8,
-            "Arquitectura" to 6,
-            "Cultura Física y Deporte" to 5,
-            "Administración de Empresas" to 4,
-            "Contaduría Pública" to 3
-        )
-    )
+    private val _queriedProgramsStats = MutableStateFlow<Map<String, Int>>(emptyMap())
     val queriedProgramsStats: StateFlow<Map<String, Int>> = _queriedProgramsStats.asStateFlow()
 
     fun sendChatMessage(text: String) {

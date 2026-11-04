@@ -20,7 +20,7 @@ import com.example.data.model.RagDocument
         CampusNews::class,
         EventRegistration::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class SantotoDatabase : RoomDatabase() {
